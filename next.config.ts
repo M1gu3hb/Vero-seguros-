@@ -10,27 +10,13 @@ const supabaseHost = (() => {
   }
 })()
 
-/**
- * Content Security Policy.
- *
- * Se aplica sólo en producción: el servidor de desarrollo de Next.js necesita
- * `unsafe-eval` para el refresco rápido y eso debilitaría la política real.
+/*
+ * La Content Security Policy no está aquí, sino en el middleware
+ * (`src/lib/security.ts`): el administrador lleva una firma distinta en cada
+ * respuesta y eso sólo se puede calcular por petición. Si se declarara también
+ * en este archivo, el navegador recibiría dos políticas y aplicaría la
+ * intersección de ambas, que no es lo que ninguna de las dos dice.
  */
-const contentSecurityPolicy = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.supabase.co",
-  "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
-  "media-src 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  'upgrade-insecure-requests',
-].join('; ')
-
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -44,9 +30,6 @@ const securityHeaders = [
     key: 'Strict-Transport-Security',
     value: 'max-age=63072000; includeSubDomains; preload',
   },
-  ...(process.env.NODE_ENV === 'production'
-    ? [{ key: 'Content-Security-Policy', value: contentSecurityPolicy }]
-    : []),
 ]
 
 const nextConfig: NextConfig = {
@@ -66,6 +49,17 @@ const nextConfig: NextConfig = {
       {
         source: '/:path*',
         headers: securityHeaders,
+      },
+      {
+        // El administrador no debe aparecer en ningún buscador, ni siquiera si
+        // alguien enlazara a él desde fuera. La etiqueta de la página ya lo
+        // dice; la cabecera lo repite para los rastreadores que no la leen.
+        source: '/admin/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
+      },
+      {
+        source: '/admin',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
       },
     ]
   },

@@ -6,8 +6,10 @@ import type { z } from 'zod'
 import { SITE_CONTENT_TAG } from '@/lib/data'
 import {
   contactSchema,
+  idSchema,
   imageSchema,
   insurerSchema,
+  MAX_BYTES_LOTE,
   paymentTermsSchema,
   reorderSchema,
   serviceSchema,
@@ -253,10 +255,10 @@ export async function deleteService(_prev: ActionState, formData: FormData): Pro
   const supabase = await requireAdmin()
   if (!supabase) return errorState(NOT_AUTHORIZED)
 
-  const id = text(formData, 'id')
-  if (!id) return errorState('No se indicó qué servicio eliminar.')
+  const id = idSchema.safeParse(text(formData, 'id'))
+  if (!id.success) return errorState('No se indicó qué servicio eliminar.')
 
-  const { error } = await supabase.from('services').delete().eq('id', id)
+  const { error } = await supabase.from('services').delete().eq('id', id.data)
   if (error) return errorState('No se pudo eliminar el servicio.')
 
   refresh()
@@ -324,10 +326,10 @@ export async function deleteInsurer(_prev: ActionState, formData: FormData): Pro
   const supabase = await requireAdmin()
   if (!supabase) return errorState(NOT_AUTHORIZED)
 
-  const id = text(formData, 'id')
-  if (!id) return errorState('No se indicó qué aseguradora eliminar.')
+  const id = idSchema.safeParse(text(formData, 'id'))
+  if (!id.success) return errorState('No se indicó qué aseguradora eliminar.')
 
-  const { error } = await supabase.from('insurers').delete().eq('id', id)
+  const { error } = await supabase.from('insurers').delete().eq('id', id.data)
   if (error) return errorState('No se pudo eliminar la aseguradora.')
 
   refresh()
@@ -401,9 +403,14 @@ export async function saveTexts(_prev: ActionState, formData: FormData): Promise
   const supabase = await requireAdmin()
   if (!supabase) return errorState(NOT_AUTHORIZED)
 
+  const bruto = text(formData, 'values') || '{}'
+  if (bruto.length > MAX_BYTES_LOTE) {
+    return errorState('El cambio es demasiado grande. Guarda por partes.')
+  }
+
   let crudo: unknown
   try {
-    crudo = JSON.parse(text(formData, 'values') || '{}')
+    crudo = JSON.parse(bruto)
   } catch {
     return errorState('No se pudo interpretar el cambio. Vuelve a intentarlo.')
   }

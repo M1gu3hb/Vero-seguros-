@@ -2,15 +2,19 @@ import { describe, expect, it } from 'vitest'
 
 import {
   contactSchema,
+  idSchema,
   imageSchema,
   insurerSchema,
   loginSchema,
+  MAX_TEXTOS_POR_LOTE,
   normalizeText,
   passwordChangeSchema,
   paymentTermsSchema,
   serviceSchema,
   slugSchema,
+  textsSchema,
 } from '@/lib/schemas'
+import { SUPABASE_URL } from '@/lib/supabase/config'
 import { defaultSettings } from '@/content/site-content'
 
 describe('contactSchema', () => {
@@ -81,6 +85,8 @@ describe('saltos de línea', () => {
 })
 
 describe('imageSchema', () => {
+  const almacen = `${SUPABASE_URL}/storage/v1/object/public/site-media`
+
   it('convierte las cadenas vacías en null', () => {
     const result = imageSchema.safeParse({ url: '', alt: '' })
     expect(result.success).toBe(true)
@@ -90,16 +96,47 @@ describe('imageSchema', () => {
     }
   })
 
-  it('acepta una URL válida', () => {
+  it('acepta una imagen subida desde el administrador', () => {
     const result = imageSchema.safeParse({
-      url: 'https://ejemplo.supabase.co/storage/v1/object/public/site-media/foto.webp',
+      url: `${almacen}/sobre/foto.webp`,
       alt: 'Verónica Méndez',
     })
     expect(result.success).toBe(true)
   })
 
+  it('acepta una ruta del propio sitio, como los logotipos incluidos', () => {
+    expect(imageSchema.safeParse({ url: '/brand/zurich.svg', alt: '' }).success).toBe(true)
+  })
+
   it('rechaza una URL inválida', () => {
     expect(imageSchema.safeParse({ url: 'no-es-una-url', alt: '' }).success).toBe(false)
+  })
+
+  /*
+   * Lo importante de este bloque: una dirección pegada a mano no puede
+   * apuntar fuera. Si pudiera, la página cargaría una imagen de un tercero
+   * —que vería la dirección de cada visitante y podría cambiarla cuando
+   * quisiera— y ni siquiera se mostraría, porque el optimizador de imágenes
+   * admite exactamente esta misma lista.
+   */
+  it.each([
+    'https://servidor-ajeno.com/foto.jpg',
+    'https://otro-proyecto.supabase.co/storage/v1/object/public/site-media/foto.jpg',
+    `http://${new URL(SUPABASE_URL).hostname}/storage/v1/object/public/site-media/foto.jpg`,
+    `${SUPABASE_URL}/rest/v1/site_settings`,
+    'javascript:alert(1)',
+    'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+    '//evil.example.com/foto.jpg',
+  ])('rechaza «%s»', (url) => {
+    expect(imageSchema.safeParse({ url, alt: '' }).success).toBe(false)
+  })
+
+  it('la aseguradora tampoco admite un logotipo de fuera', () => {
+    const base = { name: 'Zurich', imageAlt: '', isVisible: true }
+    expect(insurerSchema.safeParse({ ...base, imageUrl: '/brand/zurich.svg' }).success).toBe(true)
+    expect(
+      insurerSchema.safeParse({ ...base, imageUrl: 'https://servidor-ajeno.com/logo.svg' }).success,
+    ).toBe(false)
   })
 })
 
@@ -190,6 +227,42 @@ describe('paymentTermsSchema', () => {
         promosInstallments: Array.from({ length: 13 }, (_, i) => `${i + 1} meses`),
       }).success,
     ).toBe(false)
+  })
+})
+
+describe('textsSchema', () => {
+  it('acepta un lote normal', () => {
+    expect(textsSchema.safeParse({ values: { 'inicio.titulo': 'Hola' } }).success).toBe(true)
+  })
+
+  it('rechaza un lote vacío', () => {
+    expect(textsSchema.safeParse({ values: {} }).success).toBe(false)
+  })
+
+  /*
+   * El campo llega como JSON desde el navegador, así que su tamaño no lo
+   * decide el catálogo: lo decide quien envía el formulario.
+   */
+  it('rechaza un lote con demasiadas frases', () => {
+    const values = Object.fromEntries(
+      Array.from({ length: MAX_TEXTOS_POR_LOTE + 1 }, (_, i) => [`grupo.clave${i}`, 'x']),
+    )
+    expect(textsSchema.safeParse({ values }).success).toBe(false)
+  })
+
+  it('rechaza una frase desmedida', () => {
+    expect(textsSchema.safeParse({ values: { 'inicio.titulo': 'x'.repeat(4001) } }).success).toBe(
+      false,
+    )
+  })
+})
+
+describe('idSchema', () => {
+  it('exige un identificador con forma de uuid', () => {
+    expect(idSchema.safeParse('7d3f1a2e-5b6c-4d8e-9f01-23456789abcd').success).toBe(true)
+    for (const valor of ['', '1', 'todos', "' or 1=1 --"]) {
+      expect(idSchema.safeParse(valor).success).toBe(false)
+    }
   })
 })
 
