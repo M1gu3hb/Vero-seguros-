@@ -1,0 +1,205 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-block: calc(6.5rem + var(--section-y) * 0.35) var(--section-y);
+  background: linear-gradient(178deg, var(--paper) 0%, var(--cream) 100%);
+  isolation: isolate;
+}
+
+/* ── Fondo: monograma en marca de agua + curva de trayectoria ──────────── */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.watermark {
+  position: absolute;
+  inset-block-start: 8%;
+  inset-inline-end: -14%;
+  width: 78%;
+  max-width: 60rem;
+  color: var(--navy);
+  opacity: 0.038;
+}
+
+.curve {
+  position: absolute;
+  inset-inline: -5%;
+  inset-block-end: 12%;
+  width: 110%;
+  height: 12rem;
+  color: rgba(19, 49, 92, 0.14);
+}
+
+/* ── Rejilla ───────────────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  gap: clamp(2.75rem, 6vw, 4.5rem);
+  align-items: center;
+}
+
+/* ── Columna editorial ─────────────────────────────────────────────────── */
+.title {
+  margin-block-start: 1.5rem;
+  font-size: var(--step-6);
+  line-height: 1.02;
+  letter-spacing: -0.028em;
+  max-width: 15ch;
+}
+
+.title em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--navy);
+}
+
+.description {
+  margin-block-start: 1.75rem;
+  max-width: 36rem;
+  color: var(--text-muted);
+  font-size: var(--step-1);
+  line-height: 1.65;
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-block-start: 2.25rem;
+}
+
+.coverage {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-block-start: 1.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-faint);
+}
+
+.coverageDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex: none;
+}
+
+/* ── Placa de firma (inspirada en la tarjeta) ──────────────────────────── */
+.plate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.15rem;
+  padding: clamp(1.75rem, 4vw, 2.75rem) clamp(1.25rem, 3vw, 2.5rem);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  text-align: center;
+  box-shadow: 0 24px 60px -44px rgba(7, 20, 38, 0.55);
+}
+
+/* Marco fino desplazado: la sensación de capas superpuestas de la tarjeta */
+.plate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--gold-soft);
+  border-radius: var(--radius);
+  transform: translate(9px, 9px);
+  z-index: -1;
+  opacity: 0.65;
+}
+
+.plateMark {
+  height: clamp(2.4rem, 5vw, 3.25rem);
+  color: var(--navy);
+}
+
+.plateName {
+  font-family: var(--font-serif);
+  font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--navy);
+  line-height: 1.25;
+  text-indent: 0.2em;
+}
+
+.plateRule {
+  width: 100%;
+  max-width: 13rem;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.7;
+}
+
+.plateRole {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--slate-600);
+}
+
+.plateTagline {
+  display: block;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1.2;
+  color: var(--navy);
+  margin-block-start: 0.35rem;
+}
+
+.plateSwash {
+  width: clamp(9rem, 60%, 13rem);
+  height: 0.75rem;
+  color: var(--gold);
+}
+
+/* Fotografía opcional cargada desde el CMS */
+.photoFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--cream-200);
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 48rem) {
+  .plate {
+    gap: 1.35rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .hero {
+    padding-block: calc(7.5rem + var(--section-y) * 0.4) calc(var(--section-y) * 1.05);
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1.12fr) minmax(19rem, 0.88fr);
+    gap: clamp(3rem, 6vw, 5.5rem);
+  }
+
+  .plate {
+    max-width: 26rem;
+    margin-inline-start: auto;
+  }
+}
