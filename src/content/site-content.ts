@@ -189,6 +189,27 @@ export const defaultServices: Service[] = [
   },
 ]
 
+/*
+ * Logotipos oficiales incluidos en `public/brand/aseguradoras/`. Están
+ * normalizados en un lienzo común de 120 unidades de alto y con una escala
+ * óptica por marca, para que la cinta se lea equilibrada: un cuadrado macizo
+ * pesa más que un logotipo ancho de trazo fino a la misma altura.
+ *
+ * Mutus se muestra con su nombre en tipografía porque no se localizó un
+ * archivo oficial de su logotipo; se puede cargar desde el CMS.
+ */
+const INSURER_LOGOS: Record<string, { url: string; alt: string }> = {
+  Zurich: { url: '/brand/aseguradoras/zurich.svg', alt: 'Zurich' },
+  GNP: { url: '/brand/aseguradoras/gnp.svg', alt: 'GNP Seguros' },
+  MAPFRE: { url: '/brand/aseguradoras/mapfre.svg', alt: 'MAPFRE' },
+  MetLife: { url: '/brand/aseguradoras/metlife.svg', alt: 'MetLife' },
+  SURA: { url: '/brand/aseguradoras/sura.svg', alt: 'Seguros SURA' },
+  Chubb: { url: '/brand/aseguradoras/chubb.svg', alt: 'Chubb' },
+  AXA: { url: '/brand/aseguradoras/axa.svg', alt: 'AXA' },
+  Afirme: { url: '/brand/aseguradoras/afirme.svg', alt: 'Afirme' },
+  VRIM: { url: '/brand/aseguradoras/vrim.svg', alt: 'VRIM' },
+}
+
 export const defaultInsurers: Insurer[] = [
   'Zurich',
   'GNP',
@@ -203,8 +224,8 @@ export const defaultInsurers: Insurer[] = [
 ].map((name, index) => ({
   id: `22222222-2222-4222-8222-${String(index + 1).padStart(12, '0')}`,
   name,
-  imageUrl: null,
-  imageAlt: null,
+  imageUrl: INSURER_LOGOS[name]?.url ?? null,
+  imageAlt: INSURER_LOGOS[name]?.alt ?? null,
   sortOrder: index + 1,
   isVisible: true,
 }))

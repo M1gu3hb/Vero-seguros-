@@ -39,7 +39,36 @@ test.describe('página pública', () => {
       await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
     }
 
-    await expect(page.getByText('Zurich').first()).toBeVisible()
+    // Las aseguradoras se muestran con su logotipo oficial
+    await expect(page.getByRole('img', { name: 'Zurich' }).first()).toBeVisible()
+    await expect(page.getByRole('img', { name: 'GNP Seguros' }).first()).toBeVisible()
+    await expect(page.getByRole('img', { name: 'MetLife' }).first()).toBeVisible()
+    // Y las que no tienen logotipo cargado, con su nombre en tipografía
+    await expect(page.getByText('Mutus').first()).toBeVisible()
+  })
+
+  test('los logotipos de las aseguradoras se sirven correctamente', async ({ page, request }) => {
+    await page.goto('/')
+
+    const sources = await page
+      .locator('#aseguradoras img')
+      .evaluateAll((nodes) => nodes.map((n) => (n as HTMLImageElement).getAttribute('src') ?? ''))
+
+    expect(sources.length).toBeGreaterThan(0)
+
+    for (const src of [...new Set(sources)]) {
+      const response = await request.get(src)
+      expect(response.ok(), `no se pudo cargar ${src}`).toBe(true)
+    }
+
+    // Cada logotipo debe pintar realmente algo y no quedar en blanco
+    const painted = await page.locator('#aseguradoras img').evaluateAll((nodes) =>
+      nodes.map((n) => {
+        const img = n as HTMLImageElement
+        return { src: img.getAttribute('src'), ok: img.naturalWidth > 0 && img.naturalHeight > 0 }
+      }),
+    )
+    expect(painted.filter((p) => !p.ok)).toEqual([])
   })
 
   test('el enlace de WhatsApp lleva el número y el mensaje correctos', async ({ page }) => {
@@ -161,15 +190,52 @@ test.describe('menú móvil', () => {
   })
 })
 
+/*
+ * Se usa `page.emulateMedia` y no `test.use({ reducedMotion })`: con esta
+ * configuración de proyectos la opción no llega al navegador, y una prueba que
+ * no emula nada da un falso positivo.
+ */
 test.describe('movimiento reducido', () => {
-  test.use({ reducedMotion: 'reduce' })
-
-  test('el contenido sigue siendo legible sin animaciones', async ({ page }) => {
+  test('el contenido está visible de verdad, sin necesidad de hacer scroll', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto('/')
+    expect(
+      await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches),
+    ).toBe(true)
+    await page.waitForTimeout(500)
+
+    /*
+     * `toBeVisible` de Playwright considera visible un elemento con
+     * `opacity: 0`, así que aquí se mide la opacidad calculada: es la única
+     * forma de detectar que una aparición al hacer scroll dejó el contenido
+     * invisible para una persona.
+     */
+    const invisibles = await page.locator('[data-reveal]').evaluateAll((nodes) =>
+      nodes
+        .filter((n) => Number.parseFloat(getComputedStyle(n).opacity) < 0.99)
+        .map((n) => n.textContent?.slice(0, 40) ?? ''),
+    )
+    expect(invisibles).toEqual([])
+
+    // Y ningún bloque queda desplazado de su posición final
+    const desplazados = await page.locator('[data-reveal]').evaluateAll((nodes) =>
+      nodes.filter((n) => getComputedStyle(n).transform !== 'none').length,
+    )
+    expect(desplazados).toBe(0)
 
     await expect(page.getByRole('heading', { name: 'Seguro de Vida' })).toBeVisible()
     await expect(page.getByRole('heading', { level: 2, name: /Sobre Verónica/ })).toBeVisible()
-    await expect(page.getByText('Zurich').first()).toBeVisible()
+  })
+
+  test('la cinta de aseguradoras se sustituye por una lista estática', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.goto('/')
+    await page.waitForTimeout(400)
+
+    const marquee = page.locator('#aseguradoras [class*="marquee"]').first()
+    await expect(marquee).toBeHidden()
+
+    await expect(page.getByRole('img', { name: 'Zurich' }).first()).toBeVisible()
   })
 })
 

@@ -27,26 +27,29 @@ type RevealProps = {
 /**
  * Aparición progresiva al entrar en pantalla.
  *
- * Si el sistema pide movimiento reducido, el contenido se renderiza sin
- * animación ni transformaciones: la estructura y la legibilidad nunca
- * dependen de la animación.
+ * El árbol de elementos es siempre el mismo en servidor y en cliente: cambiarlo
+ * según el ajuste de movimiento provoca una discordancia de hidratación que
+ * puede dejar pegado el `opacity: 0` del HTML servido, con el contenido
+ * invisible. Por eso quien garantiza el resultado con movimiento reducido es el
+ * CSS (`[data-reveal]` en globals.css), que gana a los estilos en línea y no
+ * depende de JavaScript.
  */
 export function Reveal({ children, delay = 0, y = 18, as = 'div', className }: RevealProps) {
   const reduceMotion = useReducedMotion()
   const MotionTag = MOTION_TAGS[as]
-  const Tag = as
-
-  if (reduceMotion) {
-    return <Tag className={className}>{children}</Tag>
-  }
 
   return (
     <MotionTag
       className={className}
-      initial={{ opacity: 0, y }}
+      data-reveal=""
+      initial={reduceMotion ? false : { opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2, margin: '0px 0px -60px 0px' }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }
+      }
     >
       {children}
     </MotionTag>

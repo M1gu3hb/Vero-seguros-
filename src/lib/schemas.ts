@@ -18,6 +18,20 @@ const optionalUrl = z
   .nullish()
   .transform((value) => (value ? value : null))
 
+/*
+ * Los logotipos que vienen con el proyecto viven en `public/brand/`, así que
+ * aquí se admite tanto una URL absoluta (lo que sube el CMS a Supabase
+ * Storage) como una ruta del propio sitio.
+ */
+const optionalImageRef = z
+  .union([
+    z.string().trim().url(),
+    z.string().trim().regex(/^\/[a-zA-Z0-9][^\s]*$/, 'La ruta de la imagen no es válida.'),
+    z.literal(''),
+  ])
+  .nullish()
+  .transform((value) => (value ? value : null))
+
 const optionalText = (max: number) =>
   z
     .union([z.string().trim().max(max, `Máximo ${max} caracteres.`), z.literal('')])
@@ -101,7 +115,7 @@ export const serviceSchema = z.object({
 export const insurerSchema = z.object({
   id: z.string().uuid().optional(),
   name: trimmed(1, 60, 'Nombre'),
-  imageUrl: optionalUrl,
+  imageUrl: optionalImageRef,
   imageAlt: optionalText(160),
   isVisible: z.boolean(),
 })
