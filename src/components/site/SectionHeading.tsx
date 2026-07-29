@@ -3,7 +3,8 @@ import type { ReactNode } from 'react'
 type SectionHeadingProps = {
   /** Numeral de sección, en dos dígitos. */
   index: string
-  label: string
+  /** Admite un nodo para que el rótulo pueda ser un texto editable. */
+  label: ReactNode
   onNavy?: boolean
   children?: ReactNode
 }

@@ -2,9 +2,13 @@ import { DrawnPath } from '@/components/motion/DrawnPath'
 import { Reveal } from '@/components/motion/Reveal'
 import { StepArrow } from '@/components/motion/StepArrow'
 import { SectionEyebrow } from '@/components/site/SectionHeading'
-import { processSection } from '@/content/site-content'
+import { Txt } from '@/components/content/Texts'
 import { SECTIONS } from '@/lib/site'
 import styles from './Process.module.css'
+
+/* El diseño está pensado para tres pasos: la rejilla y la curva que los une
+   se apoyan en ese número. Los textos se editan; la cantidad, no. */
+const PASOS = [1, 2, 3] as const
 
 /**
  * Los tres pasos del acompañamiento.
@@ -22,9 +26,9 @@ export function Process() {
       <div className="container ruled">
         <Reveal>
           <div className={styles.head}>
-            <SectionEyebrow index="03" label={processSection.eyebrow} />
+            <SectionEyebrow index="03" label={<Txt k="proceso.etiqueta" />} />
             <h2 id="proceso-titulo" className={styles.title}>
-              {processSection.title}
+              <Txt k="proceso.titulo" />
             </h2>
           </div>
         </Reveal>
@@ -44,10 +48,10 @@ export function Process() {
           />
 
           <ol className={styles.steps}>
-            {processSection.steps.map((step, index) => (
+            {PASOS.map((paso, index) => (
               <Reveal
                 as="li"
-                key={step.title}
+                key={paso}
                 className={styles.step}
                 delay={Math.min(index * 0.12, 0.3)}
               >
@@ -57,8 +61,12 @@ export function Process() {
                   {index + 1}
                 </span>
                 <div>
-                  <h3 className={styles.stepTitle}>{step.title}</h3>
-                  <p className={styles.stepText}>{step.description}</p>
+                  <h3 className={styles.stepTitle}>
+                    <Txt k={`proceso.paso${paso}.titulo`} />
+                  </h3>
+                  <p className={styles.stepText}>
+                    <Txt k={`proceso.paso${paso}.texto`} />
+                  </p>
                 </div>
               </Reveal>
             ))}

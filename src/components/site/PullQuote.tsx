@@ -3,12 +3,8 @@
 import { motion, useReducedMotion } from 'motion/react'
 
 import { MaskedWords, wordsDuration } from '@/components/motion/MaskedWords'
+import { Txt, useEditing, useTextValue } from '@/components/content/Texts'
 import styles from './About.module.css'
-
-type PullQuoteProps = {
-  text: string
-  attribution: string
-}
 
 const STAGGER = 0.05
 
@@ -20,10 +16,28 @@ const STAGGER = 0.05
  * Es la única pieza de la página con una entrada tan marcada, y por eso
  * funciona: señala que ahí está lo importante.
  */
-export function PullQuote({ text, attribution }: PullQuoteProps) {
+export function PullQuote() {
   const reduceMotion = useReducedMotion()
+  const editing = useEditing()
+  const text = useTextValue('sobre.cita')
+  const attribution = `${useTextValue('identidad.nombre')} — ${useTextValue('identidad.cargo')}`
   const spoken = `«${text}»`
   const settled = wordsDuration(text, STAGGER) + 0.35
+
+  if (editing) {
+    return (
+      <blockquote className={styles.quote}>
+        <span className={styles.quoteRule} aria-hidden="true" />
+        <span className={styles.quoteMark} aria-hidden="true">
+          {'“'}
+        </span>
+        <p className={styles.quoteText}>
+          <Txt k="sobre.cita" />
+        </p>
+        <footer className={styles.quoteAttribution}>{attribution}</footer>
+      </blockquote>
+    )
+  }
 
   const enter = (delay: number) =>
     reduceMotion ? { duration: 0 } : { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] as const }

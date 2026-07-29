@@ -1,7 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { Reveal } from '@/components/motion/Reveal'
 import { SectionEyebrow } from '@/components/site/SectionHeading'
-import { insurersSection, type Insurer } from '@/content/site-content'
+import { Txt } from '@/components/content/Texts'
+import type { Insurer } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
 import styles from './Insurers.module.css'
 
@@ -71,9 +72,9 @@ export function Insurers({ insurers }: InsurersProps) {
       <div className="container ruled">
         <div className={styles.head}>
           <Reveal>
-            <SectionEyebrow index="05" label={insurersSection.eyebrow} />
+            <SectionEyebrow index="05" label={<Txt k="aseguradoras.etiqueta" />} />
             <h2 id="aseguradoras-titulo" className={styles.title}>
-              {insurersSection.title}
+              <Txt k="aseguradoras.titulo" />
             </h2>
           </Reveal>
         </div>
@@ -113,7 +114,7 @@ export function Insurers({ insurers }: InsurersProps) {
 
       <div className="container">
         <Reveal delay={0.1}>
-          <p className={styles.note}>{insurersSection.note}</p>
+          <p className={styles.note}><Txt k="aseguradoras.nota" /></p>
         </Reveal>
       </div>
     </section>

@@ -3,9 +3,13 @@ import { Trajectory } from '@/components/brand/Trajectory'
 import { Reveal } from '@/components/motion/Reveal'
 import { UnderlinedTitle } from '@/components/motion/UnderlinedTitle'
 import { SectionEyebrow } from '@/components/site/SectionHeading'
-import { humanSection } from '@/content/site-content'
+import { Txt } from '@/components/content/Texts'
 import { SECTIONS } from '@/lib/site'
 import styles from './HumanSense.module.css'
+
+/* Cinco puntos: es lo que sostiene el ritmo de la lista contra el título.
+   Los textos se editan; la cantidad, no. */
+const PILARES = [1, 2, 3, 4, 5] as const
 
 /** El diferenciador de Verónica, contado con hechos y sin adjetivos de folleto. */
 export function HumanSense() {
@@ -23,11 +27,11 @@ export function HumanSense() {
       <div className={`container ruled ruled--on-navy ${styles.grid}`}>
         <div>
           <Reveal>
-            <SectionEyebrow index="02" label={humanSection.eyebrow} onNavy />
+            <SectionEyebrow index="02" label={<Txt k="humano.etiqueta" />} onNavy />
           </Reveal>
           <UnderlinedTitle
             id="humano-titulo"
-            text={humanSection.title}
+            textKey="humano.titulo"
             className={styles.title}
             maskClassName={styles.titleMask}
             wordClassName={styles.titleWord}
@@ -36,19 +40,23 @@ export function HumanSense() {
         </div>
 
         <ul className={styles.list}>
-          {humanSection.pillars.map((pillar, index) => (
+          {PILARES.map((pilar, index) => (
             <Reveal
               as="li"
-              key={pillar.title}
+              key={pilar}
               className={styles.item}
               delay={Math.min(index * 0.06, 0.3)}
               y={12}
             >
               <span className={styles.itemIndex} aria-hidden="true">
-                {String(index + 1).padStart(2, '0')}
+                {String(pilar).padStart(2, '0')}
               </span>
-              <h3 className={styles.itemTitle}>{pillar.title}</h3>
-              <p className={styles.itemText}>{pillar.description}</p>
+              <h3 className={styles.itemTitle}>
+                <Txt k={`humano.pilar${pilar}.titulo`} />
+              </h3>
+              <p className={styles.itemText}>
+                <Txt k={`humano.pilar${pilar}.texto`} />
+              </p>
             </Reveal>
           ))}
         </ul>

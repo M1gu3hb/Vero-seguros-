@@ -2,6 +2,9 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import { About } from '@/components/site/About'
+import { partirEnParrafos } from '@/components/site/Biografia'
+import { TextsProvider } from '@/components/content/Texts'
+import { defaultTexts } from '@/content/texts'
 import { Footer } from '@/components/site/Footer'
 import { Payments } from '@/components/site/Payments'
 import { Services } from '@/components/site/Services'
@@ -74,47 +77,51 @@ describe('<ServiceIcon />', () => {
   })
 })
 
-/**
- * La biografía se escribe palabra por palabra, así que cada párrafo queda
- * repartido en varios `span`. Lo que interesa comprobar sigue siendo lo mismo:
- * que el texto completo esté en el documento y separado en los párrafos
- * correctos.
- */
-function parrafosDe(section: HTMLElement) {
-  return Array.from(section.querySelectorAll('p')).map((p) =>
-    (p.textContent ?? '').replace(/\s+/g, ' ').trim(),
-  )
-}
 
-describe('<About />', () => {
+describe('biografía', () => {
+  /*
+   * El navegador envía los campos de texto con saltos CRLF, así que un texto
+   * guardado antes de normalizarlo puede traer «\r\n\r\n» en vez de «\n\n».
+   */
   it('separa la biografía en párrafos con saltos simples', () => {
-    render(
-      <About
-        settings={{ ...defaultSettings, aboutBody: 'Uno del texto.\n\nDos del texto.\n\nTres.' }}
-      />,
-    )
-    const parrafos = parrafosDe(screen.getByRole('region', { name: /Sobre Verónica/ }))
-    expect(parrafos).toContain('Uno del texto.')
-    expect(parrafos).toContain('Dos del texto.')
-    expect(parrafos).toContain('Tres.')
+    expect(partirEnParrafos('Uno del texto.\n\nDos del texto.\n\nTres.')).toEqual([
+      'Uno del texto.',
+      'Dos del texto.',
+      'Tres.',
+    ])
   })
 
   it('también los separa si el texto llega con saltos CRLF del navegador', () => {
-    render(
-      <About
-        settings={{ ...defaultSettings, aboutBody: 'Uno del texto.\r\n\r\nDos del texto.' }}
-      />,
-    )
-    const parrafos = parrafosDe(screen.getByRole('region', { name: /Sobre Verónica/ }))
-    expect(parrafos).toContain('Uno del texto.')
-    expect(parrafos).toContain('Dos del texto.')
+    expect(partirEnParrafos('Uno del texto.\r\n\r\nDos del texto.')).toEqual([
+      'Uno del texto.',
+      'Dos del texto.',
+    ])
   })
 
-  it('la cita se anuncia completa aunque se componga palabra por palabra', () => {
-    render(<About settings={defaultSettings} />)
+  it('descarta los párrafos vacíos', () => {
+    expect(partirEnParrafos('Uno.\n\n\n\nDos.\n\n   \n\n')).toEqual(['Uno.', 'Dos.'])
+  })
+})
+
+describe('<About />', () => {
+  it('muestra la biografía y la cita que le llegan del registro de textos', () => {
+    const textos = {
+      ...defaultTexts,
+      'sobre.biografia': 'Primer párrafo propio.\n\nSegundo párrafo propio.',
+      'sobre.cita': 'Una frase que resume el trabajo.',
+    }
+
+    render(
+      <TextsProvider texts={textos}>
+        <About settings={defaultSettings} />
+      </TextsProvider>,
+    )
+
     const section = screen.getByRole('region', { name: /Sobre Verónica/ })
-    const cita = section.querySelector('blockquote')
-    expect(cita?.textContent).toContain(defaultSettings.aboutQuote)
+    const texto = (section.textContent ?? '').replace(/\s+/g, ' ')
+    expect(texto).toContain('Primer párrafo propio.')
+    expect(texto).toContain('Segundo párrafo propio.')
+    expect(texto).toContain('Una frase que resume el trabajo.')
   })
 })
 

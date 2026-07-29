@@ -3,6 +3,7 @@
 import { useId, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion/react'
 
+import { Txt } from '@/components/content/Texts'
 import { Reveal } from '@/components/motion/Reveal'
 import { ServiceIcon } from '@/components/site/ServiceIcon'
 import type { Service } from '@/content/site-content'
@@ -189,7 +190,7 @@ function Destacado({ service, index, open, onToggle }: ItemProps) {
 
         {desplegable ? (
           <span className={styles.hint} aria-hidden="true">
-            {open ? 'Cerrar' : 'Qué cubre'}
+            <Txt k={open ? 'seguros.cerrar' : 'seguros.abrir'} />
             <Marca estado={estado} />
           </span>
         ) : null}

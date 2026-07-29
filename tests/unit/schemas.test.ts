@@ -1,133 +1,105 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  aboutSchema,
-  heroSchema,
-  identitySchema,
+  contactSchema,
+  imageSchema,
   insurerSchema,
   loginSchema,
+  normalizeText,
   passwordChangeSchema,
-  promosSchema,
+  paymentTermsSchema,
   serviceSchema,
   slugSchema,
 } from '@/lib/schemas'
 import { defaultSettings } from '@/content/site-content'
 
-describe('identitySchema', () => {
-  const base = {
-    brandName: defaultSettings.brandName,
-    brandRole: defaultSettings.brandRole,
-    brandTagline: defaultSettings.brandTagline,
-    contactEmail: defaultSettings.contactEmail,
-    whatsappNumber: defaultSettings.whatsappNumber,
-    whatsappMessage: defaultSettings.whatsappMessage,
-    coverageText: defaultSettings.coverageText,
-  }
-
+describe('contactSchema', () => {
   it('acepta el contenido inicial', () => {
-    expect(identitySchema.safeParse(base).success).toBe(true)
+    expect(
+      contactSchema.safeParse({
+        contactEmail: defaultSettings.contactEmail,
+        whatsappNumber: defaultSettings.whatsappNumber,
+        whatsappMessage: defaultSettings.whatsappMessage,
+      }).success,
+    ).toBe(true)
   })
 
   it('normaliza el número de WhatsApp escrito con formato', () => {
-    const result = identitySchema.safeParse({ ...base, whatsappNumber: '+52 55 4008 5632' })
+    const result = contactSchema.safeParse({
+      contactEmail: 'v@example.com',
+      whatsappNumber: '+52 55 4008 5632',
+      whatsappMessage: 'Hola, me gustaría recibir orientación.',
+    })
     expect(result.success).toBe(true)
     if (result.success) expect(result.data.whatsappNumber).toBe('525540085632')
   })
 
   it('rechaza un correo inválido', () => {
-    expect(identitySchema.safeParse({ ...base, contactEmail: 'no-es-correo' }).success).toBe(false)
+    expect(
+      contactSchema.safeParse({
+        contactEmail: 'no-es-correo',
+        whatsappNumber: '525540085632',
+        whatsappMessage: 'Hola, me gustaría recibir orientación.',
+      }).success,
+    ).toBe(false)
   })
 
   it('rechaza un número demasiado corto', () => {
-    expect(identitySchema.safeParse({ ...base, whatsappNumber: '55400' }).success).toBe(false)
-  })
-
-  it('rechaza campos vacíos', () => {
-    expect(identitySchema.safeParse({ ...base, brandName: '   ' }).success).toBe(false)
+    expect(
+      contactSchema.safeParse({
+        contactEmail: 'v@example.com',
+        whatsappNumber: '55400',
+        whatsappMessage: 'Hola, me gustaría recibir orientación.',
+      }).success,
+    ).toBe(false)
   })
 })
 
 describe('saltos de línea', () => {
   /*
-   * El navegador envía el contenido de un `textarea` con saltos CRLF. Si no se
-   * normalizan, la biografía se guarda con `\r\n\r\n` y deja de partirse en
+   * El navegador envía el contenido de un campo de texto con saltos CRLF. Si no
+   * se normalizan, la biografía se guarda con «\r\n\r\n» y deja de partirse en
    * párrafos al mostrarla.
    */
-  const base = {
-    aboutTitle: 'Sobre Verónica',
-    aboutIntro: 'Una introducción con la longitud suficiente para pasar la validación.',
-    aboutQuote: 'Una cita con la longitud suficiente.',
-    aboutImageUrl: '',
-    aboutImageAlt: '',
-  }
-
   it('convierte CRLF en saltos simples', () => {
-    const result = aboutSchema.safeParse({
-      ...base,
-      aboutBody: 'Primer párrafo del texto.\r\n\r\nSegundo párrafo del texto.',
-    })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.aboutBody).toBe('Primer párrafo del texto.\n\nSegundo párrafo del texto.')
-      expect(result.data.aboutBody).not.toContain('\r')
-      expect(result.data.aboutBody.split(/\n{2,}/)).toHaveLength(2)
-    }
+    const limpio = normalizeText('Primer párrafo del texto.\r\n\r\nSegundo párrafo del texto.')
+    expect(limpio).toBe('Primer párrafo del texto.\n\nSegundo párrafo del texto.')
+    expect(limpio).not.toContain('\r')
+    expect(limpio.split(/\n{2,}/)).toHaveLength(2)
   })
 
   it('reduce tres o más saltos seguidos a una separación de párrafo', () => {
-    const result = aboutSchema.safeParse({
-      ...base,
-      aboutBody: 'Primer párrafo del texto.\n\n\n\n\nSegundo párrafo del texto.',
-    })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.aboutBody.split(/\n{2,}/)).toHaveLength(2)
-      expect(result.data.aboutBody).not.toContain('\n\n\n')
-    }
+    const limpio = normalizeText('Primer párrafo.\n\n\n\n\nSegundo párrafo.')
+    expect(limpio.split(/\n{2,}/)).toHaveLength(2)
+    expect(limpio).not.toContain('\n\n\n')
   })
 
   it('conserva el texto cuando ya viene limpio', () => {
     const cuerpo = 'Primer párrafo.\n\nSegundo párrafo.\n\nTercer párrafo.'
-    const result = aboutSchema.safeParse({ ...base, aboutBody: cuerpo })
-    expect(result.success).toBe(true)
-    if (result.success) expect(result.data.aboutBody).toBe(cuerpo)
+    expect(normalizeText(cuerpo)).toBe(cuerpo)
   })
 })
 
-describe('heroSchema', () => {
-  const base = {
-    heroEyebrow: defaultSettings.heroEyebrow,
-    heroTitle: defaultSettings.heroTitle,
-    heroDescription: defaultSettings.heroDescription,
-    heroPrimaryCta: defaultSettings.heroPrimaryCta,
-    heroSecondaryCta: defaultSettings.heroSecondaryCta,
-    heroImageUrl: '',
-    heroImageAlt: '',
-  }
-
-  it('convierte las cadenas vacías de imagen en null', () => {
-    const result = heroSchema.safeParse(base)
+describe('imageSchema', () => {
+  it('convierte las cadenas vacías en null', () => {
+    const result = imageSchema.safeParse({ url: '', alt: '' })
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.heroImageUrl).toBeNull()
-      expect(result.data.heroImageAlt).toBeNull()
+      expect(result.data.url).toBeNull()
+      expect(result.data.alt).toBeNull()
     }
   })
 
-  it('acepta una URL de imagen válida', () => {
-    const result = heroSchema.safeParse({
-      ...base,
-      heroImageUrl: 'https://ejemplo.supabase.co/storage/v1/object/public/site-media/foto.jpg',
+  it('acepta una URL válida', () => {
+    const result = imageSchema.safeParse({
+      url: 'https://ejemplo.supabase.co/storage/v1/object/public/site-media/foto.webp',
+      alt: 'Verónica Méndez',
     })
     expect(result.success).toBe(true)
   })
 
   it('rechaza una URL inválida', () => {
-    expect(heroSchema.safeParse({ ...base, heroImageUrl: 'no-es-url' }).success).toBe(false)
-  })
-
-  it('rechaza un título demasiado largo', () => {
-    expect(heroSchema.safeParse({ ...base, heroTitle: 'a'.repeat(200) }).success).toBe(false)
+    expect(imageSchema.safeParse({ url: 'no-es-una-url', alt: '' }).success).toBe(false)
   })
 })
 
@@ -179,24 +151,19 @@ describe('insurerSchema', () => {
   })
 })
 
-describe('promosSchema', () => {
+describe('paymentTermsSchema', () => {
   const base = {
-    promosTitle: defaultSettings.promosTitle,
-    promosDescription: defaultSettings.promosDescription,
-    promosNote: defaultSettings.promosNote,
     promosVisible: true,
-    promosInstallmentsLabel: defaultSettings.promosInstallmentsLabel,
     promosInstallments: defaultSettings.promosInstallments,
-    promosFrequenciesLabel: defaultSettings.promosFrequenciesLabel,
     promosFrequencies: defaultSettings.promosFrequencies,
   }
 
   it('acepta el contenido inicial', () => {
-    expect(promosSchema.safeParse(base).success).toBe(true)
+    expect(paymentTermsSchema.safeParse(base).success).toBe(true)
   })
 
   it('descarta los renglones vacíos de las listas', () => {
-    const result = promosSchema.safeParse({
+    const result = paymentTermsSchema.safeParse({
       ...base,
       promosInstallments: ['3 meses', '   ', '', '12 meses'],
     })
@@ -205,20 +172,20 @@ describe('promosSchema', () => {
   })
 
   it('admite una lista vacía: así se oculta ese bloque', () => {
-    const result = promosSchema.safeParse({ ...base, promosFrequencies: [] })
+    const result = paymentTermsSchema.safeParse({ ...base, promosFrequencies: [] })
     expect(result.success).toBe(true)
     if (result.success) expect(result.data.promosFrequencies).toEqual([])
   })
 
   it('rechaza un elemento demasiado largo', () => {
     expect(
-      promosSchema.safeParse({ ...base, promosInstallments: ['x'.repeat(41)] }).success,
+      paymentTermsSchema.safeParse({ ...base, promosInstallments: ['x'.repeat(41)] }).success,
     ).toBe(false)
   })
 
   it('rechaza más de doce elementos', () => {
     expect(
-      promosSchema.safeParse({
+      paymentTermsSchema.safeParse({
         ...base,
         promosInstallments: Array.from({ length: 13 }, (_, i) => `${i + 1} meses`),
       }).success,

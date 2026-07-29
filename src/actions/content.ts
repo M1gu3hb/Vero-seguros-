@@ -5,14 +5,17 @@ import type { z } from 'zod'
 
 import { SITE_CONTENT_TAG } from '@/lib/data'
 import {
-  aboutSchema,
-  heroSchema,
-  identitySchema,
+  contactSchema,
+  imageSchema,
   insurerSchema,
-  promosSchema,
+  paymentTermsSchema,
   reorderSchema,
   serviceSchema,
+  normalizeText,
+  textsSchema,
 } from '@/lib/schemas'
+import { TEXT_BY_KEY } from '@/content/texts'
+import type { SiteSettings } from '@/content/site-content'
 import { createClient, getAdminUser } from '@/lib/supabase/server'
 import type { SiteSettingsRow } from '@/lib/supabase/types'
 import { type ActionState, errorState, successState } from './types'
@@ -61,6 +64,33 @@ const bool = (formData: FormData, key: string) => formData.get(key) === 'on' || 
 const list = (formData: FormData, key: string) =>
   formData.getAll(key).filter((value): value is string => typeof value === 'string')
 
+/**
+ * De la propiedad que usa la interfaz a la columna que usa la base de datos.
+ *
+ * Sólo aparecen las frases que el catálogo de textos puede tocar: el resto de
+ * los ajustes se guarda por su formulario, con su propia validación.
+ */
+const SETTINGS_COLUMNS = {
+  brandName: 'brand_name',
+  brandRole: 'brand_role',
+  brandTagline: 'brand_tagline',
+  coverageText: 'coverage_text',
+  heroEyebrow: 'hero_eyebrow',
+  heroTitle: 'hero_title',
+  heroDescription: 'hero_description',
+  heroPrimaryCta: 'hero_primary_cta',
+  heroSecondaryCta: 'hero_secondary_cta',
+  aboutTitle: 'about_title',
+  aboutIntro: 'about_intro',
+  aboutBody: 'about_body',
+  aboutQuote: 'about_quote',
+  promosTitle: 'promos_title',
+  promosDescription: 'promos_description',
+  promosNote: 'promos_note',
+  promosInstallmentsLabel: 'promos_installments_label',
+  promosFrequenciesLabel: 'promos_frequencies_label',
+} as const satisfies Partial<Record<keyof SiteSettings, keyof SiteSettingsRow>>
+
 /* ── Ajustes del sitio ──────────────────────────────────────────────────── */
 
 async function updateSettings(
@@ -81,18 +111,17 @@ async function updateSettings(
   return successState(successMessage)
 }
 
-export async function saveIdentity(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const parsed = identitySchema.safeParse({
-    brandName: text(formData, 'brandName'),
-    brandRole: text(formData, 'brandRole'),
-    brandTagline: text(formData, 'brandTagline'),
+/**
+ * Las formas de contacto.
+ *
+ * El nombre, el cargo y la frase de marca ya no se guardan aquí: son texto de
+ * la página y viajan con el resto, por `saveTexts`.
+ */
+export async function saveContact(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = contactSchema.safeParse({
     contactEmail: text(formData, 'contactEmail'),
     whatsappNumber: text(formData, 'whatsappNumber'),
     whatsappMessage: text(formData, 'whatsappMessage'),
-    coverageText: text(formData, 'coverageText'),
   })
 
   if (!parsed.success) {
@@ -101,83 +130,53 @@ export async function saveIdentity(
 
   return updateSettings(
     {
-      brand_name: parsed.data.brandName,
-      brand_role: parsed.data.brandRole,
-      brand_tagline: parsed.data.brandTagline,
       contact_email: parsed.data.contactEmail,
       whatsapp_number: parsed.data.whatsappNumber,
       whatsapp_message: parsed.data.whatsappMessage,
-      coverage_text: parsed.data.coverageText,
     },
-    'Identidad y contacto actualizados.',
+    'Formas de contacto actualizadas.',
   )
 }
 
-export async function saveHero(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const parsed = heroSchema.safeParse({
-    heroEyebrow: text(formData, 'heroEyebrow'),
-    heroTitle: text(formData, 'heroTitle'),
-    heroDescription: text(formData, 'heroDescription'),
-    heroPrimaryCta: text(formData, 'heroPrimaryCta'),
-    heroSecondaryCta: text(formData, 'heroSecondaryCta'),
-    heroImageUrl: text(formData, 'heroImageUrl'),
-    heroImageAlt: text(formData, 'heroImageAlt'),
+export async function saveHeroImage(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = imageSchema.safeParse({
+    url: text(formData, 'heroImageUrl'),
+    alt: text(formData, 'heroImageAlt'),
   })
 
   if (!parsed.success) {
-    return errorState('Revisa los campos marcados.', flatten(parsed.error))
+    return errorState('Revisa la imagen.', flatten(parsed.error))
   }
 
   return updateSettings(
-    {
-      hero_eyebrow: parsed.data.heroEyebrow,
-      hero_title: parsed.data.heroTitle,
-      hero_description: parsed.data.heroDescription,
-      hero_primary_cta: parsed.data.heroPrimaryCta,
-      hero_secondary_cta: parsed.data.heroSecondaryCta,
-      hero_image_url: parsed.data.heroImageUrl,
-      hero_image_alt: parsed.data.heroImageAlt,
-    },
-    'Sección de inicio actualizada.',
+    { hero_image_url: parsed.data.url, hero_image_alt: parsed.data.alt },
+    'Fotografía de inicio actualizada.',
   )
 }
 
-export async function saveAbout(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const parsed = aboutSchema.safeParse({
-    aboutTitle: text(formData, 'aboutTitle'),
-    aboutIntro: text(formData, 'aboutIntro'),
-    aboutBody: text(formData, 'aboutBody'),
-    aboutQuote: text(formData, 'aboutQuote'),
-    aboutImageUrl: text(formData, 'aboutImageUrl'),
-    aboutImageAlt: text(formData, 'aboutImageAlt'),
+export async function saveAboutImage(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = imageSchema.safeParse({
+    url: text(formData, 'aboutImageUrl'),
+    alt: text(formData, 'aboutImageAlt'),
   })
 
   if (!parsed.success) {
-    return errorState('Revisa los campos marcados.', flatten(parsed.error))
+    return errorState('Revisa la imagen.', flatten(parsed.error))
   }
 
   return updateSettings(
-    {
-      about_title: parsed.data.aboutTitle,
-      about_intro: parsed.data.aboutIntro,
-      about_body: parsed.data.aboutBody,
-      about_quote: parsed.data.aboutQuote,
-      about_image_url: parsed.data.aboutImageUrl,
-      about_image_alt: parsed.data.aboutImageAlt,
-    },
-    'Sección «Sobre Verónica» actualizada.',
+    { about_image_url: parsed.data.url, about_image_alt: parsed.data.alt },
+    'Fotografía actualizada.',
   )
 }
 
-export async function savePromos(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const parsed = promosSchema.safeParse({
-    promosTitle: text(formData, 'promosTitle'),
-    promosDescription: text(formData, 'promosDescription'),
-    promosNote: text(formData, 'promosNote'),
+export async function savePaymentTerms(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = paymentTermsSchema.safeParse({
     promosVisible: bool(formData, 'promosVisible'),
-    promosInstallmentsLabel: text(formData, 'promosInstallmentsLabel'),
     promosInstallments: list(formData, 'promosInstallments'),
-    promosFrequenciesLabel: text(formData, 'promosFrequenciesLabel'),
     promosFrequencies: list(formData, 'promosFrequencies'),
   })
 
@@ -187,16 +186,11 @@ export async function savePromos(_prev: ActionState, formData: FormData): Promis
 
   return updateSettings(
     {
-      promos_title: parsed.data.promosTitle,
-      promos_description: parsed.data.promosDescription,
-      promos_note: parsed.data.promosNote,
       promos_visible: parsed.data.promosVisible,
-      promos_installments_label: parsed.data.promosInstallmentsLabel,
       promos_installments: parsed.data.promosInstallments,
-      promos_frequencies_label: parsed.data.promosFrequenciesLabel,
       promos_frequencies: parsed.data.promosFrequencies,
     },
-    'Promociones y formas de pago actualizadas.',
+    'Plazos y modalidades actualizados.',
   )
 }
 
@@ -391,4 +385,79 @@ function describeError(error: { code?: string; message?: string }, entity: strin
   }
   console.error(`[admin] error al guardar ${entity}:`, error)
   return `No se pudo guardar el ${entity}. Inténtalo de nuevo.`
+}
+
+/* ── Textos de la página ────────────────────────────────────────────────── */
+
+/**
+ * Guarda un lote de frases.
+ *
+ * Llega un mapa de clave a texto, tal cual lo dejó el panel o la vista previa.
+ * Aquí se reparte: las claves que corresponden a una columna de
+ * `site_settings` se escriben ahí, y el resto va a `site_texts`. Quien edita
+ * no tiene por qué saber de esa diferencia.
+ */
+export async function saveTexts(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const supabase = await requireAdmin()
+  if (!supabase) return errorState(NOT_AUTHORIZED)
+
+  let crudo: unknown
+  try {
+    crudo = JSON.parse(text(formData, 'values') || '{}')
+  } catch {
+    return errorState('No se pudo interpretar el cambio. Vuelve a intentarlo.')
+  }
+
+  const parsed = textsSchema.safeParse({ values: crudo })
+  if (!parsed.success) return errorState('No hay nada que guardar.')
+
+  const errores: Record<string, string[]> = {}
+  const columnas: Partial<SiteSettingsRow> = {}
+  const sueltos: { key: string; value: string }[] = []
+
+  for (const [key, valor] of Object.entries(parsed.data.values)) {
+    const entrada = TEXT_BY_KEY.get(key)
+    if (!entrada) continue
+
+    const limpio = normalizeText(valor).trim()
+
+    if (limpio.length < entrada.min) {
+      errores[key] = [`${entrada.label}: escribe al menos ${entrada.min} caracteres.`]
+      continue
+    }
+    if (limpio.length > entrada.max) {
+      errores[key] = [`${entrada.label}: máximo ${entrada.max} caracteres.`]
+      continue
+    }
+
+    if (entrada.column) {
+      const columna = SETTINGS_COLUMNS[entrada.column as keyof typeof SETTINGS_COLUMNS]
+      if (columna) columnas[columna] = limpio as never
+    } else {
+      sueltos.push({ key, value: limpio })
+    }
+  }
+
+  if (Object.keys(errores).length > 0) {
+    return errorState('Revisa los textos marcados.', errores)
+  }
+
+  if (Object.keys(columnas).length > 0) {
+    const { error } = await supabase.from('site_settings').update(columnas).eq('id', 1)
+    if (error) {
+      console.error('[admin] error al guardar textos en ajustes:', error)
+      return errorState('No se pudo guardar. Inténtalo de nuevo.')
+    }
+  }
+
+  if (sueltos.length > 0) {
+    const { error } = await supabase.from('site_texts').upsert(sueltos, { onConflict: 'key' })
+    if (error) {
+      console.error('[admin] error al guardar textos:', error)
+      return errorState('No se pudo guardar. Inténtalo de nuevo.')
+    }
+  }
+
+  refresh()
+  return successState('Textos actualizados.')
 }

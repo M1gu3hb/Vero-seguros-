@@ -1,4 +1,5 @@
 import { Trajectory } from '@/components/brand/Trajectory'
+import { Txt } from '@/components/content/Texts'
 import { Reveal } from '@/components/motion/Reveal'
 import { CropMarks, SectionEyebrow } from '@/components/site/SectionHeading'
 import { SECTIONS } from '@/lib/site'
@@ -71,11 +72,11 @@ export function Payments({ settings }: PaymentsProps) {
             <Trajectory className={styles.curve} />
 
             <div className={styles.intro}>
-              <SectionEyebrow index="06" label="Formas de pago" />
+              <SectionEyebrow index="06" label={<Txt k="pagos.etiqueta" />} />
               <h2 id="pagos-titulo" className={styles.title}>
-                {settings.promosTitle}
+                <Txt k="pagos.titulo" />
               </h2>
-              <p className={styles.description}>{settings.promosDescription}</p>
+              <p className={styles.description}><Txt k="pagos.descripcion" /></p>
             </div>
 
             {hasTerms ? (
@@ -93,7 +94,7 @@ export function Payments({ settings }: PaymentsProps) {
               </div>
             ) : null}
 
-            <p className={styles.note}>{settings.promosNote}</p>
+            <p className={styles.note}><Txt k="pagos.nota" /></p>
           </div>
         </Reveal>
       </div>

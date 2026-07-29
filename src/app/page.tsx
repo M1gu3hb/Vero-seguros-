@@ -17,11 +17,14 @@ import {
   buildWhatsAppUrl,
 } from '@/lib/contact'
 import { getPublicContent } from '@/lib/data'
+import { TextsProvider } from '@/components/content/Texts'
+import { buildTexts } from '@/content/texts'
 
 export const revalidate = 300
 
 export default async function HomePage() {
-  const { settings, services, insurers } = await getPublicContent()
+  const { settings, services, insurers, texts } = await getPublicContent()
+  const textos = buildTexts(settings, texts)
 
   const whatsappUrl = buildWhatsAppUrl(settings.whatsappNumber, settings.whatsappMessage)
   /* El mismo texto que ya lleva el botón de WhatsApp, para que quien escriba
@@ -38,7 +41,7 @@ export default async function HomePage() {
   )
 
   return (
-    <>
+    <TextsProvider texts={textos}>
       <StructuredData settings={settings} services={services} />
 
       <ReadingProgress />
@@ -78,6 +81,6 @@ export default async function HomePage() {
       </main>
 
       <Footer settings={settings} year={new Date().getFullYear()} />
-    </>
+    </TextsProvider>
   )
 }

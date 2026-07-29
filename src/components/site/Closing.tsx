@@ -3,7 +3,8 @@ import { Trajectory } from '@/components/brand/Trajectory'
 import { Reveal } from '@/components/motion/Reveal'
 import { MailLink } from '@/components/site/MailLink'
 import { SectionEyebrow } from '@/components/site/SectionHeading'
-import { closingSection, type SiteSettings } from '@/content/site-content'
+import { Txt } from '@/components/content/Texts'
+import type { SiteSettings } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
 import styles from './Closing.module.css'
 
@@ -29,11 +30,11 @@ export function Closing({ settings, whatsappUrl, mailtoUrl, webmailUrl }: Closin
 
       <div className={`container ruled ruled--on-navy ${styles.inner}`}>
         <Reveal>
-          <SectionEyebrow index="07" label={closingSection.eyebrow} onNavy />
+          <SectionEyebrow index="07" label={<Txt k="cierre.etiqueta" />} onNavy />
           <h2 id="contacto-titulo" className={styles.title}>
-            {closingSection.title}
+            <Txt k="cierre.titulo" />
           </h2>
-          <p className={styles.description}>{closingSection.description}</p>
+          <p className={styles.description}><Txt k="cierre.descripcion" /></p>
         </Reveal>
 
         <Reveal delay={0.1} className={styles.actions}>
@@ -45,7 +46,7 @@ export function Closing({ settings, whatsappUrl, mailtoUrl, webmailUrl }: Closin
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Platiquemos por WhatsApp
+                <Txt k="cierre.botonWhatsapp" />
                 <span className="btn__arrow" aria-hidden="true">
                   →
                 </span>
@@ -56,13 +57,15 @@ export function Closing({ settings, whatsappUrl, mailtoUrl, webmailUrl }: Closin
               href={mailtoUrl}
               webmailHref={webmailUrl}
             >
-              Quiero recibir orientación
+              <Txt k="cierre.botonCorreo" />
             </MailLink>
           </div>
 
           <dl className={styles.contactList}>
             <div className={styles.contactRow}>
-              <dt className={styles.contactLabel}>Correo</dt>
+              <dt className={styles.contactLabel}>
+                <Txt k="cierre.rotuloCorreo" />
+              </dt>
               <dd>
                 <a className={styles.contactValue} href={`mailto:${settings.contactEmail}`}>
                   {settings.contactEmail}
@@ -70,14 +73,18 @@ export function Closing({ settings, whatsappUrl, mailtoUrl, webmailUrl }: Closin
               </dd>
             </div>
             <div className={styles.contactRow}>
-              <dt className={styles.contactLabel}>Cobertura</dt>
+              <dt className={styles.contactLabel}>
+                <Txt k="cierre.rotuloCobertura" />
+              </dt>
               <dd className={styles.contactValue}>{settings.coverageText}</dd>
             </div>
           </dl>
 
           <p className={styles.signature}>
             <Monogram className={styles.signatureMark} height="1.5rem" />
-            <span className={styles.signatureText}>{settings.brandTagline}</span>
+            <span className={styles.signatureText}>
+              <Txt k="identidad.frase" />
+            </span>
           </p>
         </Reveal>
       </div>
