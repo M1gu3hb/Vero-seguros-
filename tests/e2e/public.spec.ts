@@ -1,7 +1,12 @@
 import { expect, test, type Page } from '@playwright/test'
 
-const WHATSAPP_DIGITS = '525540085632'
-const EMAIL = 'veronicam0602@gmail.com'
+/*
+ * Estas pruebas comprueban el comportamiento del sitio, no el contenido: todo
+ * lo que se ve es editable desde el CMS, así que fijar aquí nombres de ramos o
+ * de aseguradoras haría que la suite se rompiera cada vez que Verónica cambia
+ * algo. Se verifican invariantes: que haya contenido, que los enlaces se
+ * formen bien y que el número de WhatsApp nunca se escriba.
+ */
 
 /** Recorre la página para disparar las apariciones al hacer scroll. */
 async function scrollThrough(page: Page) {
@@ -17,7 +22,7 @@ async function scrollThrough(page: Page) {
 }
 
 test.describe('página pública', () => {
-  test('renderiza la identidad y el contenido inicial', async ({ page }) => {
+  test('renderiza la identidad y todas las secciones con contenido', async ({ page }) => {
     await page.goto('/')
 
     await expect(page).toHaveTitle(/Verónica Méndez \| Seguros con Sentido Humano/)
@@ -26,25 +31,20 @@ test.describe('página pública', () => {
 
     await scrollThrough(page)
 
-    for (const name of [
-      'Seguro de Vida',
-      'Gastos Médicos Mayores',
-      'Seguro de Auto',
-      'Seguro para Camión',
-      'Responsabilidad Civil',
-      'Seguro de Hogar',
-      'Gastos Funerarios',
-      'Membresías de Salud',
-    ]) {
-      await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
-    }
+    // Cada ramo publicado tiene nombre y descripción
+    const servicios = await page.locator('#seguros h3').allInnerTexts()
+    expect(servicios.length).toBeGreaterThan(0)
+    for (const nombre of servicios) expect(nombre.trim().length).toBeGreaterThan(2)
 
-    // Las aseguradoras se muestran con su logotipo oficial
-    await expect(page.getByRole('img', { name: 'Zurich' }).first()).toBeVisible()
-    await expect(page.getByRole('img', { name: 'GNP Seguros' }).first()).toBeVisible()
-    await expect(page.getByRole('img', { name: 'MetLife' }).first()).toBeVisible()
-    // Y las que no tienen logotipo cargado, con su nombre en tipografía
-    await expect(page.getByText('Mutus').first()).toBeVisible()
+    // Y cada aseguradora publicada se ve, con logotipo o con su nombre
+    const marcas = await page
+      .locator('#aseguradoras img, #aseguradoras [class*="name"]')
+      .count()
+    expect(marcas).toBeGreaterThan(0)
+
+    // La biografía llega separada en párrafos, no como un bloque
+    const parrafos = await page.locator('#sobre-veronica p').count()
+    expect(parrafos).toBeGreaterThan(2)
   })
 
   test('los logotipos de las aseguradoras se sirven correctamente', async ({ page, request }) => {
@@ -71,38 +71,54 @@ test.describe('página pública', () => {
     expect(painted.filter((p) => !p.ok)).toEqual([])
   })
 
-  test('el enlace de WhatsApp lleva el número y el mensaje correctos', async ({ page }) => {
+  test('el enlace de WhatsApp se forma bien y lleva mensaje prellenado', async ({ page }) => {
     await page.goto('/')
 
     // Se busca dentro de <main>: el botón del encabezado se oculta en pantallas
     // pequeñas y el del hero está siempre presente.
-    const link = page.locator(`main a[href^="https://wa.me/${WHATSAPP_DIGITS}"]`).first()
+    const link = page.locator('main a[href^="https://wa.me/"]').first()
     await expect(link).toBeVisible()
 
     const href = await link.getAttribute('href')
-    expect(href).toContain(`https://wa.me/${WHATSAPP_DIGITS}?text=`)
+    expect(href).toMatch(/^https:\/\/wa\.me\/\d{10,15}\?text=.+/)
 
     const message = decodeURIComponent(href!.split('?text=')[1] ?? '')
-    expect(message).toContain('Hola, Verónica')
+    expect(message.trim().length).toBeGreaterThan(10)
   })
 
   test('el número de WhatsApp no aparece escrito en el sitio', async ({ page }) => {
     await page.goto('/')
-    await scrollThrough(page)
 
+    // El número se toma del propio enlace: así la prueba sigue siendo válida
+    // aunque Verónica lo cambie desde el administrador.
+    const href = await page.locator('main a[href^="https://wa.me/"]').first().getAttribute('href')
+    const digits = href!.match(/wa\.me\/(\d+)/)![1]!
+    const local = digits.slice(-10)
+
+    await scrollThrough(page)
     const text = await page.locator('body').innerText()
-    expect(text).not.toContain('5540085632')
-    expect(text).not.toContain('55 4008 5632')
-    expect(text).not.toContain('55-4008-5632')
+
+    for (const forma of [
+      digits,
+      local,
+      `${local.slice(0, 2)} ${local.slice(2, 6)} ${local.slice(6)}`,
+      `${local.slice(0, 2)}-${local.slice(2, 6)}-${local.slice(6)}`,
+    ]) {
+      expect(text, `el número no debe aparecer como «${forma}»`).not.toContain(forma)
+    }
   })
 
-  test('el correo abre un enlace mailto', async ({ page }) => {
+  test('el correo se muestra y abre un enlace mailto', async ({ page }) => {
     await page.goto('/')
     await scrollThrough(page)
 
-    const mailto = page.locator(`main a[href^="mailto:${EMAIL}"]`).first()
-    await expect(mailto).toHaveAttribute('href', new RegExp(`^mailto:${EMAIL}`))
-    await expect(page.getByText(EMAIL).first()).toBeVisible()
+    const mailto = page.locator('main a[href^="mailto:"]').first()
+    await expect(mailto).toBeVisible()
+
+    const href = await mailto.getAttribute('href')
+    const address = href!.replace(/^mailto:/, '').split('?')[0]!
+    expect(address).toMatch(/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i)
+    await expect(page.getByText(address).first()).toBeVisible()
   })
 
   test('las anclas de navegación existen y apuntan a secciones reales', async ({ page }) => {
@@ -235,7 +251,9 @@ test.describe('movimiento reducido', () => {
     const marquee = page.locator('#aseguradoras [class*="marquee"]').first()
     await expect(marquee).toBeHidden()
 
-    await expect(page.getByRole('img', { name: 'Zurich' }).first()).toBeVisible()
+    // Las aseguradoras siguen visibles en la lista estática
+    const marcas = await page.locator('#aseguradoras img, #aseguradoras [class*="name"]').count()
+    expect(marcas).toBeGreaterThan(0)
   })
 })
 

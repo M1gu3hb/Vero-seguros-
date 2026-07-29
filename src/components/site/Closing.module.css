@@ -1,6 +1,8 @@
 .section {
   position: relative;
-  background: var(--navy);
+  background-color: var(--navy);
+  background-image: var(--grain);
+  background-blend-mode: multiply;
   color: var(--on-navy);
   overflow: hidden;
   isolation: isolate;

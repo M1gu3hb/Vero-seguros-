@@ -62,6 +62,12 @@
   --section-y: clamp(4.5rem, 3rem + 7vw, 9rem);
   --radius: 2px;
 
+  /* ── Superficie ────────────────────────────────────────────────────────── */
+  /* Grano de papel: ruido muy tenue que da tacto impreso sin pesar nada */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+  --shadow-plate: 0 1px 1px rgba(7, 20, 38, 0.03), 0 8px 20px -14px rgba(7, 20, 38, 0.22),
+    0 32px 60px -46px rgba(7, 20, 38, 0.4);
+
   /* ── Movimiento ────────────────────────────────────────────────────────── */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
@@ -99,6 +105,16 @@ body {
   /* Evita cualquier desbordamiento horizontal accidental */
   overflow-x: hidden;
 }
+
+/*
+ * Grano de papel.
+ *
+ * Se aplica como capa de fondo de cada superficie —ver los módulos de cada
+ * sección— y no como una capa fija sobre todo el documento: un elemento fijo
+ * a pantalla completa con `mix-blend-mode` mete la página entera en un grupo
+ * de mezcla, encarece cada repintado al desplazarse y llega a dejar sin
+ * rasterizar el contenido que queda fuera de la ventana.
+ */
 
 img,
 svg,
@@ -173,6 +189,41 @@ hr {
   padding-inline: var(--gutter);
 }
 
+/*
+ * Retícula editorial: dos hilos verticales marcan el ancho de la caja de
+ * texto, como los márgenes de una página impresa. Sólo desde tablet, y sólo
+ * en las secciones claras.
+ */
+.ruled {
+  position: relative;
+}
+
+@media (min-width: 64rem) {
+  .ruled::before,
+  .ruled::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    width: 1px;
+    background: var(--rule);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .ruled::before {
+    inset-inline-start: max(var(--gutter), calc((100% - var(--max-w)) / 2 + var(--gutter)));
+  }
+
+  .ruled::after {
+    inset-inline-end: max(var(--gutter), calc((100% - var(--max-w)) / 2 + var(--gutter)));
+  }
+
+  .ruled--on-navy::before,
+  .ruled--on-navy::after {
+    background: var(--on-navy-rule);
+  }
+}
+
 .section {
   padding-block: var(--section-y);
   position: relative;
@@ -199,6 +250,27 @@ hr {
   opacity: 0.6;
 }
 
+/* Numeral de sección: estructura editorial, no información nueva */
+.eyebrow__index {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.eyebrow__index::after {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 0.7em;
+  margin-inline: 0.7rem 0.05rem;
+  background: currentColor;
+  opacity: 0.4;
+  vertical-align: -0.02em;
+}
+
 .eyebrow--on-navy {
   color: var(--gold-soft);
 }
@@ -213,6 +285,51 @@ hr {
 
 .prose p + p {
   margin-top: 1.15em;
+}
+
+/*
+ * Marcas de esquina, como las de registro de una página impresa. Se aplican a
+ * los bloques enmarcados (placa del hero, retrato, panel de pagos).
+ */
+.cropped {
+  position: relative;
+}
+
+.cropped > .crop {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border: 0 solid var(--gold);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.crop--tl {
+  inset-block-start: -1px;
+  inset-inline-start: -1px;
+  border-block-start-width: 1px;
+  border-inline-start-width: 1px;
+}
+
+.crop--tr {
+  inset-block-start: -1px;
+  inset-inline-end: -1px;
+  border-block-start-width: 1px;
+  border-inline-end-width: 1px;
+}
+
+.crop--bl {
+  inset-block-end: -1px;
+  inset-inline-start: -1px;
+  border-block-end-width: 1px;
+  border-inline-start-width: 1px;
+}
+
+.crop--br {
+  inset-block-end: -1px;
+  inset-inline-end: -1px;
+  border-block-end-width: 1px;
+  border-inline-end-width: 1px;
 }
 
 /* Sólo para lectores de pantalla */
@@ -264,11 +381,28 @@ hr {
   white-space: nowrap;
   cursor: pointer;
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   transition:
-    background-color var(--dur-fast) var(--ease-soft),
-    color var(--dur-fast) var(--ease-soft),
-    border-color var(--dur-fast) var(--ease-soft),
-    transform var(--dur-fast) var(--ease-soft);
+    color var(--dur) var(--ease-soft),
+    border-color var(--dur) var(--ease-soft),
+    transform var(--dur-fast) var(--ease-soft),
+    box-shadow var(--dur) var(--ease-soft);
+}
+
+/* Relleno que sube desde abajo al pasar el cursor */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: translateY(101%);
+  transition: transform var(--dur) var(--ease);
+}
+
+.btn:hover::before,
+.btn:focus-visible::before {
+  transform: translateY(0);
 }
 
 .btn:active {
@@ -279,11 +413,16 @@ hr {
   background: var(--navy);
   color: var(--on-navy);
   border-color: var(--navy);
+  box-shadow: 0 10px 24px -18px rgba(7, 20, 38, 0.85);
+}
+
+.btn--primary::before {
+  background: var(--gold-deep);
 }
 
 .btn--primary:hover {
-  background: var(--navy-800);
-  border-color: var(--navy-800);
+  border-color: var(--gold-deep);
+  box-shadow: 0 14px 28px -18px rgba(7, 20, 38, 0.6);
 }
 
 .btn--secondary {
@@ -292,9 +431,14 @@ hr {
   border-color: var(--rule-strong);
 }
 
-.btn--secondary:hover {
+.btn--secondary::before {
+  background: var(--navy);
+}
+
+.btn--secondary:hover,
+.btn--secondary:focus-visible {
+  color: var(--on-navy);
   border-color: var(--navy);
-  background: rgba(19, 49, 92, 0.04);
 }
 
 .btn--on-navy {
@@ -303,8 +447,11 @@ hr {
   border-color: var(--cream);
 }
 
-.btn--on-navy:hover {
+.btn--on-navy::before {
   background: #fff;
+}
+
+.btn--on-navy:hover {
   border-color: #fff;
 }
 
@@ -314,9 +461,13 @@ hr {
   border-color: var(--on-navy-rule);
 }
 
-.btn--ghost-on-navy:hover {
-  border-color: var(--cream);
-  background: rgba(248, 239, 230, 0.08);
+.btn--ghost-on-navy::before {
+  background: rgba(248, 239, 230, 0.12);
+}
+
+.btn--ghost-on-navy:hover,
+.btn--ghost-on-navy:focus-visible {
+  border-color: var(--gold-soft);
 }
 
 /* La flecha del botón se desplaza al pasar el cursor */
@@ -326,6 +477,18 @@ hr {
 
 .btn:hover .btn__arrow {
   transform: translateX(3px);
+}
+
+/* Indicador de avance de lectura, bajo el encabezado */
+.progress {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 2px;
+  z-index: 120;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--navy) 0%, var(--gold) 100%);
+  pointer-events: none;
 }
 
 /* ── Bloques sobre azul marino ────────────────────────────────────────────── */
@@ -382,5 +545,10 @@ hr {
   [data-draw] {
     stroke-dasharray: none !important;
     stroke-dashoffset: 0 !important;
+  }
+
+  /* El indicador de avance depende del desplazamiento: se retira */
+  .progress {
+    display: none !important;
   }
 }

@@ -1,5 +1,6 @@
 import { DrawnPath } from '@/components/motion/DrawnPath'
 import { Reveal } from '@/components/motion/Reveal'
+import { SectionEyebrow } from '@/components/site/SectionHeading'
 import { processSection } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
 import styles from './Process.module.css'
@@ -17,10 +18,10 @@ export function Process() {
       className={`section ${styles.section}`}
       aria-labelledby="proceso-titulo"
     >
-      <div className="container">
+      <div className="container ruled">
         <Reveal>
           <div className={styles.head}>
-            <p className="eyebrow">{processSection.eyebrow}</p>
+            <SectionEyebrow index="03" label={processSection.eyebrow} />
             <h2 id="proceso-titulo" className={styles.title}>
               {processSection.title}
             </h2>

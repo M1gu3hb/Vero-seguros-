@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  aboutSchema,
   heroSchema,
   identitySchema,
   insurerSchema,
@@ -43,6 +44,53 @@ describe('identitySchema', () => {
 
   it('rechaza campos vacíos', () => {
     expect(identitySchema.safeParse({ ...base, brandName: '   ' }).success).toBe(false)
+  })
+})
+
+describe('saltos de línea', () => {
+  /*
+   * El navegador envía el contenido de un `textarea` con saltos CRLF. Si no se
+   * normalizan, la biografía se guarda con `\r\n\r\n` y deja de partirse en
+   * párrafos al mostrarla.
+   */
+  const base = {
+    aboutTitle: 'Sobre Verónica',
+    aboutIntro: 'Una introducción con la longitud suficiente para pasar la validación.',
+    aboutQuote: 'Una cita con la longitud suficiente.',
+    aboutImageUrl: '',
+    aboutImageAlt: '',
+  }
+
+  it('convierte CRLF en saltos simples', () => {
+    const result = aboutSchema.safeParse({
+      ...base,
+      aboutBody: 'Primer párrafo del texto.\r\n\r\nSegundo párrafo del texto.',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.aboutBody).toBe('Primer párrafo del texto.\n\nSegundo párrafo del texto.')
+      expect(result.data.aboutBody).not.toContain('\r')
+      expect(result.data.aboutBody.split(/\n{2,}/)).toHaveLength(2)
+    }
+  })
+
+  it('reduce tres o más saltos seguidos a una separación de párrafo', () => {
+    const result = aboutSchema.safeParse({
+      ...base,
+      aboutBody: 'Primer párrafo del texto.\n\n\n\n\nSegundo párrafo del texto.',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.aboutBody.split(/\n{2,}/)).toHaveLength(2)
+      expect(result.data.aboutBody).not.toContain('\n\n\n')
+    }
+  })
+
+  it('conserva el texto cuando ya viene limpio', () => {
+    const cuerpo = 'Primer párrafo.\n\nSegundo párrafo.\n\nTercer párrafo.'
+    const result = aboutSchema.safeParse({ ...base, aboutBody: cuerpo })
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.aboutBody).toBe(cuerpo)
   })
 })
 

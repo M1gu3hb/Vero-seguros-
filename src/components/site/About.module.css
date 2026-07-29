@@ -1,5 +1,7 @@
 .section {
-  background: var(--cream);
+  background-color: var(--cream);
+  background-image: var(--grain);
+  background-blend-mode: multiply;
   position: relative;
   overflow: hidden;
 }
@@ -20,6 +22,7 @@
   border: 1px solid var(--rule);
   background: var(--paper);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-plate);
 }
 
 /* Marco desplazado — las capas de la tarjeta */
@@ -61,6 +64,29 @@
 .markGlyph {
   height: clamp(2.75rem, 7vw, 4.25rem);
   color: var(--navy);
+}
+
+/* Doble filete bajo el monograma, como el de la tarjeta */
+.markRules {
+  display: grid;
+  gap: 3px;
+  width: 4.5rem;
+  justify-items: center;
+}
+
+.markRules span {
+  display: block;
+  height: 1px;
+  background: var(--gold);
+}
+
+.markRules span:first-child {
+  width: 100%;
+}
+
+.markRules span:last-child {
+  width: 55%;
+  opacity: 0.6;
 }
 
 .markRule {
@@ -113,9 +139,24 @@
 }
 
 .quote {
-  margin-block-start: clamp(2rem, 4vw, 2.75rem);
-  padding-inline-start: clamp(1.25rem, 3vw, 2rem);
+  position: relative;
+  margin-block-start: clamp(2.25rem, 4vw, 3rem);
+  padding-inline-start: clamp(1.5rem, 3.5vw, 2.5rem);
   border-inline-start: 1px solid var(--gold);
+}
+
+/* Comilla de apertura en grande, como en una cita de revista */
+.quote::before {
+  content: '\201C';
+  position: absolute;
+  inset-block-start: -0.18em;
+  inset-inline-start: clamp(0.6rem, 1.6vw, 1.1rem);
+  font-family: var(--font-serif);
+  font-size: clamp(3.5rem, 7vw, 5.5rem);
+  line-height: 1;
+  color: var(--gold);
+  opacity: 0.22;
+  pointer-events: none;
 }
 
 .quoteText {

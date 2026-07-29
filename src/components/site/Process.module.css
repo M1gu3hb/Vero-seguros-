@@ -1,5 +1,7 @@
 .section {
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image: var(--grain);
+  background-blend-mode: multiply;
   position: relative;
   overflow: hidden;
 }
@@ -51,30 +53,68 @@
 }
 
 .marker {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 1.9rem;
-  height: 1.9rem;
+  width: 2.4rem;
+  height: 2.4rem;
   border: 1px solid var(--rule-strong);
   border-radius: 50%;
   background: var(--paper);
   font-family: var(--font-serif);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   color: var(--navy);
   flex: none;
   transition:
     border-color var(--dur) var(--ease-soft),
-    background-color var(--dur) var(--ease-soft);
+    color var(--dur) var(--ease-soft),
+    transform var(--dur) var(--ease);
+}
+
+/* Anillo exterior que se abre al pasar el cursor */
+.marker::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.82);
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
 }
 
 .step:hover .marker {
   border-color: var(--gold);
-  background: var(--cream);
+  transform: translateY(-2px);
+}
+
+.step:hover .marker::before {
+  opacity: 0.7;
+  transform: scale(1);
 }
 
 .stepTitle {
   font-size: var(--step-2);
   line-height: 1.2;
+}
+
+/* Regla fina que enlaza el paso con la trayectoria */
+.stepTitle::before {
+  content: '';
+  display: block;
+  width: 1.75rem;
+  height: 1px;
+  margin-block-end: 0.9rem;
+  background: var(--gold);
+  opacity: 0.55;
+  transform-origin: left;
+  transition: transform var(--dur) var(--ease);
+}
+
+.step:hover .stepTitle::before {
+  transform: scaleX(1.9);
 }
 
 .stepText {
@@ -88,8 +128,12 @@
 @media (min-width: 48rem) {
   .steps {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(1.5rem, 3vw, 2.75rem);
+    gap: clamp(2rem, 4vw, 3.5rem);
     padding-block-start: 3.6rem;
+  }
+
+  .stepTitle {
+    max-width: 15ch;
   }
 
   .step {

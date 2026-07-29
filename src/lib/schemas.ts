@@ -13,6 +13,20 @@ const trimmed = (min: number, max: number, label: string) =>
     .min(min, `${label}: mínimo ${min} caracteres.`)
     .max(max, `${label}: máximo ${max} caracteres.`)
 
+/**
+ * Igual que `trimmed`, pero normalizando los saltos de línea.
+ *
+ * El navegador envía el contenido de un `textarea` con saltos CRLF (`\r\n`),
+ * así que un texto escrito con párrafos se guardaba como `\r\n\r\n` y la
+ * separación en párrafos dejaba de reconocerse. Aquí se unifica a `\n` y se
+ * limitan los saltos seguidos a dos, que es lo que significa «párrafo nuevo».
+ */
+const multiline = (min: number, max: number, label: string) =>
+  z
+    .string()
+    .transform((value) => value.replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n'))
+    .pipe(trimmed(min, max, label))
+
 const optionalUrl = z
   .union([z.string().trim().url('La dirección de la imagen no es válida.'), z.literal('')])
   .nullish()
@@ -53,7 +67,7 @@ export const identitySchema = z.object({
       (value) => value.length >= 10 && value.length <= 15,
       'El número de WhatsApp debe tener entre 10 y 15 dígitos, incluyendo la clave del país (por ejemplo 52).',
     ),
-  whatsappMessage: trimmed(10, 400, 'Mensaje de WhatsApp'),
+  whatsappMessage: multiline(10, 400, 'Mensaje de WhatsApp'),
   coverageText: trimmed(2, 90, 'Texto de cobertura'),
 })
 
@@ -61,8 +75,8 @@ export const identitySchema = z.object({
 
 export const heroSchema = z.object({
   heroEyebrow: trimmed(2, 90, 'Etiqueta'),
-  heroTitle: trimmed(10, 160, 'Título'),
-  heroDescription: trimmed(20, 500, 'Descripción'),
+  heroTitle: multiline(10, 160, 'Título'),
+  heroDescription: multiline(20, 500, 'Descripción'),
   heroPrimaryCta: trimmed(2, 40, 'Botón principal'),
   heroSecondaryCta: trimmed(2, 40, 'Botón secundario'),
   heroImageUrl: optionalUrl,
@@ -73,9 +87,9 @@ export const heroSchema = z.object({
 
 export const aboutSchema = z.object({
   aboutTitle: trimmed(2, 90, 'Título'),
-  aboutIntro: trimmed(20, 500, 'Introducción'),
-  aboutBody: trimmed(20, 4000, 'Biografía'),
-  aboutQuote: trimmed(10, 300, 'Cita'),
+  aboutIntro: multiline(20, 500, 'Introducción'),
+  aboutBody: multiline(20, 4000, 'Biografía'),
+  aboutQuote: multiline(10, 300, 'Cita'),
   aboutImageUrl: optionalUrl,
   aboutImageAlt: optionalText(160),
 })
@@ -84,8 +98,8 @@ export const aboutSchema = z.object({
 
 export const promosSchema = z.object({
   promosTitle: trimmed(2, 90, 'Título'),
-  promosDescription: trimmed(20, 700, 'Descripción'),
-  promosNote: trimmed(10, 400, 'Nota de condiciones'),
+  promosDescription: multiline(20, 700, 'Descripción'),
+  promosNote: multiline(10, 400, 'Nota de condiciones'),
   promosVisible: z.boolean(),
 })
 
@@ -105,7 +119,7 @@ export const serviceSchema = z.object({
   id: z.string().uuid().optional(),
   name: trimmed(2, 80, 'Nombre'),
   slug: slugSchema,
-  description: trimmed(10, 400, 'Descripción'),
+  description: multiline(10, 400, 'Descripción'),
   icon: trimmed(1, 40, 'Icono'),
   isVisible: z.boolean(),
 })

@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
+import { About } from '@/components/site/About'
 import { Footer } from '@/components/site/Footer'
 import { Payments } from '@/components/site/Payments'
 import { Services } from '@/components/site/Services'
@@ -18,8 +19,10 @@ describe('<Services />', () => {
   it('destaca los dos primeros y numera el resto de forma correlativa', () => {
     render(<Services services={defaultServices} />)
     const section = screen.getByRole('region', { name: /qué quieres proteger/i })
-    expect(within(section).getByText('01')).toBeInTheDocument()
+    // «01» aparece dos veces: el numeral de la sección y el del primer ramo
+    expect(within(section).getAllByText('01').length).toBeGreaterThanOrEqual(1)
     expect(within(section).getByText('08')).toBeInTheDocument()
+    expect(within(section).getByText('05')).toBeInTheDocument()
   })
 
   it('no renderiza nada si no hay servicios', () => {
@@ -41,6 +44,31 @@ describe('<ServiceIcon />', () => {
     expect(svg).toBeTruthy()
     expect(svg?.getAttribute('aria-hidden')).toBe('true')
     expect(svg?.querySelectorAll('path, circle, rect').length).toBeGreaterThan(0)
+  })
+})
+
+describe('<About />', () => {
+  it('separa la biografía en párrafos con saltos simples', () => {
+    render(
+      <About
+        settings={{ ...defaultSettings, aboutBody: 'Uno del texto.\n\nDos del texto.\n\nTres.' }}
+      />,
+    )
+    const section = screen.getByRole('region', { name: /Sobre Verónica/ })
+    expect(within(section).getByText('Uno del texto.')).toBeInTheDocument()
+    expect(within(section).getByText('Dos del texto.')).toBeInTheDocument()
+    expect(within(section).getByText('Tres.')).toBeInTheDocument()
+  })
+
+  it('también los separa si el texto llega con saltos CRLF del navegador', () => {
+    render(
+      <About
+        settings={{ ...defaultSettings, aboutBody: 'Uno del texto.\r\n\r\nDos del texto.' }}
+      />,
+    )
+    const section = screen.getByRole('region', { name: /Sobre Verónica/ })
+    expect(within(section).getByText('Uno del texto.')).toBeInTheDocument()
+    expect(within(section).getByText('Dos del texto.')).toBeInTheDocument()
   })
 })
 

@@ -2,6 +2,7 @@ import Image from 'next/image'
 
 import { Monogram } from '@/components/brand/Monogram'
 import { Reveal } from '@/components/motion/Reveal'
+import { CropMarks, SectionEyebrow } from '@/components/site/SectionHeading'
 import { SECTIONS } from '@/lib/site'
 import type { SiteSettings } from '@/content/site-content'
 import styles from './About.module.css'
@@ -18,8 +19,13 @@ type AboutProps = {
  * inventada.
  */
 export function About({ settings }: AboutProps) {
+  /*
+   * Se acepta cualquier convención de salto de línea: el navegador envía los
+   * `textarea` con CRLF, así que un texto guardado antes de normalizarlo en el
+   * servidor puede traer `\r\n\r\n` en vez de `\n\n`.
+   */
   const paragraphs = settings.aboutBody
-    .split(/\n{2,}/)
+    .split(/(?:\r\n?|\n)\s*(?:\r\n?|\n)/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
 
@@ -29,9 +35,10 @@ export function About({ settings }: AboutProps) {
       className={`section ${styles.section}`}
       aria-labelledby="sobre-titulo"
     >
-      <div className={`container ${styles.grid}`}>
+      <div className={`container ruled ${styles.grid}`}>
         <Reveal className={styles.aside} y={24}>
-          <figure className={styles.frame}>
+          <figure className={`cropped ${styles.frame}`}>
+            <CropMarks />
             {settings.aboutImageUrl ? (
               <div className={styles.photoWrap}>
                 <Image
@@ -45,7 +52,10 @@ export function About({ settings }: AboutProps) {
             ) : (
               <div className={styles.mark}>
                 <Monogram className={styles.markGlyph} height="3.5rem" />
-                <span className={styles.markRule} aria-hidden="true" />
+                <span className={styles.markRules} aria-hidden="true">
+                  <span />
+                  <span />
+                </span>
                 <p className={styles.markTagline}>{settings.brandTagline}</p>
                 <p className={styles.markSince}>Agente desde 2018</p>
               </div>
@@ -55,7 +65,7 @@ export function About({ settings }: AboutProps) {
 
         <div>
           <Reveal>
-            <p className="eyebrow">Trayectoria</p>
+            <SectionEyebrow index="04" label="Trayectoria" />
             <h2 id="sobre-titulo" className={styles.title}>
               {settings.aboutTitle}
             </h2>

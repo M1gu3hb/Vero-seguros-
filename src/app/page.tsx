@@ -1,3 +1,4 @@
+import { ReadingProgress } from '@/components/motion/ReadingProgress'
 import { About } from '@/components/site/About'
 import { Closing } from '@/components/site/Closing'
 import { Footer } from '@/components/site/Footer'
@@ -23,6 +24,8 @@ export default async function HomePage() {
   return (
     <>
       <StructuredData settings={settings} services={services} />
+
+      <ReadingProgress />
 
       <a className="skip-link" href="#contenido">
         Ir al contenido

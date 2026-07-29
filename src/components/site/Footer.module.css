@@ -1,8 +1,31 @@
 .footer {
-  background: var(--ink);
+  background-color: var(--ink);
+  background-image: var(--grain);
+  background-blend-mode: multiply;
   color: var(--on-navy-muted);
   padding-block: clamp(2.5rem, 5vw, 3.5rem);
   font-size: 0.8125rem;
+}
+
+/* Remate: el monograma centrado sobre una regla, como el colofón de un libro */
+.colophon {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-block-end: 2rem;
+}
+
+.colophonRule {
+  flex: 1;
+  height: 1px;
+  background: rgba(248, 239, 230, 0.14);
+}
+
+.colophonMark {
+  height: 1.1rem;
+  color: var(--gold-soft);
+  opacity: 0.8;
+  flex: none;
 }
 
 .top {
