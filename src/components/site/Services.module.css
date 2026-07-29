@@ -7,20 +7,30 @@
 }
 
 /* ── Línea que baja de fondo ────────────────────────────────────────────── */
+/*
+ * Franja de la mitad derecha. Ocupando la sección entera la diagonal queda tan
+ * tendida que el trazo casi no se ve entre renglón y renglón; con esta anchura
+ * baja con la inclinación justa para leerse de fondo.
+ *
+ * La altura la marca la proporción del propio trazo y el bloque se centra: así
+ * la línea se ve completa, de un extremo al otro, sin que el lienzo la corte.
+ */
 .coil {
   position: absolute;
-  inset-block: 0;
-  inset-inline-end: 0;
-  width: min(58%, 46rem);
+  inset-block-start: 50%;
+  inset-inline-end: -4%;
+  width: min(64%, 52rem);
+  transform: translateY(-50%);
   color: var(--gold);
-  opacity: 0.42;
+  opacity: 0.5;
   pointer-events: none;
   z-index: 0;
 }
 
 .coil svg {
+  display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
 }
 
 .section > :global(.container) {

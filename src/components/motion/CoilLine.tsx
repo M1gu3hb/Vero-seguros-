@@ -36,7 +36,9 @@ export function CoilLine({ className }: CoilLineProps) {
       {reduceMotion || !inView ? null : (
         <svg
           viewBox={`0 0 ${COIL_VIEWBOX.width} ${COIL_VIEWBOX.height}`}
-          preserveAspectRatio="xMidYMid slice"
+          /* `meet`, no `slice`: recortando el lienzo la diagonal se salía por
+             un costado a media altura y el trazo terminaba de golpe. */
+          preserveAspectRatio="xMidYMid meet"
           fill="none"
           focusable="false"
         >
