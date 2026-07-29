@@ -48,12 +48,15 @@ security definer
 set search_path = public, pg_catalog
 as $$
 declare
+  fila_json jsonb := to_jsonb(coalesce(new, old));
   identificador text;
 begin
-  identificador := coalesce(
-    (to_jsonb(coalesce(new, old)) ->> 'id'),
-    '—'
-  );
+  /*
+   * Cada tabla se identifica por lo suyo: los servicios y las aseguradoras por
+   * su `id`, las frases sueltas por su clave. Sin esto, la bitácora diría
+   * «cambió una frase» sin decir cuál.
+   */
+  identificador := coalesce(fila_json ->> 'id', fila_json ->> 'key', '—');
 
   insert into public.content_audit (tabla, fila, accion, actor, correo, antes, despues)
   values (
