@@ -51,15 +51,19 @@ function Marca({ estado }: { estado: Estado }) {
           : { duration: 0.2, ease: 'easeOut' }
       }
     >
+      {/* `initial` en la forma de reposo: sin él las barras nacerían planas y
+          darían un cuarto de vuelta al aparecer la sección. */}
       <motion.span
         className={styles.marcaBarra}
         variants={BARRA_A}
+        initial="mas"
         animate={estado}
         transition={reduceMotion ? { duration: 0 } : MORFO}
       />
       <motion.span
         className={styles.marcaBarra}
         variants={BARRA_B}
+        initial="mas"
         animate={estado}
         transition={reduceMotion ? { duration: 0 } : MORFO}
       />
