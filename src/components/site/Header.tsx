@@ -130,6 +130,7 @@ export function Header({
           aria-label={`${brandName}, ${brandRole}. Ir al inicio`}
         >
           <Monogram height="1.375rem" className={styles.brandMark} />
+          <span className={styles.brandDivider} aria-hidden="true" />
           <span className={styles.brandText}>
             <span className={styles.brandName}>{brandName}</span>
             <span className={styles.brandRole}>{brandRole}</span>

@@ -1,5 +1,6 @@
 import { Trajectory } from '@/components/brand/Trajectory'
 import { Reveal } from '@/components/motion/Reveal'
+import { CropMarks, SectionEyebrow } from '@/components/site/SectionHeading'
 import { SECTIONS } from '@/lib/site'
 import type { SiteSettings } from '@/content/site-content'
 import styles from './Payments.module.css'
@@ -24,11 +25,12 @@ export function Payments({ settings }: PaymentsProps) {
     >
       <div className="container">
         <Reveal>
-          <div className={styles.panel}>
+          <div className={`cropped ${styles.panel}`}>
+            <CropMarks />
             <Trajectory className={styles.curve} />
 
             <div>
-              <p className="eyebrow">Formas de pago</p>
+              <SectionEyebrow index="06" label="Formas de pago" />
               <h2 id="pagos-titulo" className={styles.title}>
                 {settings.promosTitle}
               </h2>

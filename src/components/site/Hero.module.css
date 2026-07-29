@@ -2,7 +2,8 @@
   position: relative;
   overflow: hidden;
   padding-block: calc(6.5rem + var(--section-y) * 0.35) var(--section-y);
-  background: linear-gradient(178deg, var(--paper) 0%, var(--cream) 100%);
+  background-image: var(--grain), linear-gradient(178deg, var(--paper) 0%, var(--cream) 100%);
+  background-blend-mode: multiply;
   isolation: isolate;
 }
 
@@ -89,6 +90,45 @@
   flex: none;
 }
 
+/* Pista de desplazamiento: una línea que respira */
+.scrollHint {
+  display: none;
+  position: absolute;
+  inset-block-end: 2.25rem;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.scrollHintLine {
+  display: block;
+  width: 1px;
+  height: 3rem;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  transform-origin: top;
+  animation: hint 2.6s var(--ease-soft) infinite;
+}
+
+@keyframes hint {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.35;
+  }
+  45% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
 /* ── Placa de firma (inspirada en la tarjeta) ──────────────────────────── */
 .plate {
   position: relative;
@@ -96,24 +136,49 @@
   flex-direction: column;
   align-items: center;
   gap: 1.15rem;
-  padding: clamp(1.75rem, 4vw, 2.75rem) clamp(1.25rem, 3vw, 2.5rem);
+  padding: clamp(2rem, 4vw, 3.25rem) clamp(1.35rem, 3vw, 2.75rem);
   background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   text-align: center;
-  box-shadow: 0 24px 60px -44px rgba(7, 20, 38, 0.55);
+  box-shadow: var(--shadow-plate);
+  transition: transform var(--dur) var(--ease);
 }
 
-/* Marco fino desplazado: la sensación de capas superpuestas de la tarjeta */
-.plate::before {
+.plate:hover {
+  transform: translateY(-3px);
+}
+
+/* Dos marcos finos desplazados: las capas superpuestas de la tarjeta */
+.plate::before,
+.plate::after {
   content: '';
   position: absolute;
   inset: 0;
-  border: 1px solid var(--gold-soft);
   border-radius: var(--radius);
-  transform: translate(9px, 9px);
   z-index: -1;
-  opacity: 0.65;
+  pointer-events: none;
+  transition: transform var(--dur) var(--ease);
+}
+
+.plate::before {
+  border: 1px solid var(--gold-soft);
+  transform: translate(10px, 10px);
+  opacity: 0.7;
+}
+
+.plate::after {
+  border: 1px solid var(--rule);
+  transform: translate(19px, 19px);
+  opacity: 0.45;
+}
+
+.plate:hover::before {
+  transform: translate(13px, 13px);
+}
+
+.plate:hover::after {
+  transform: translate(25px, 25px);
 }
 
 .plateMark {
@@ -131,12 +196,28 @@
   text-indent: 0.2em;
 }
 
-.plateRule {
+.plateRules {
+  display: grid;
+  gap: 3px;
   width: 100%;
   max-width: 13rem;
+  justify-items: center;
+}
+
+.plateRules span {
+  display: block;
   height: 1px;
   background: var(--gold);
-  opacity: 0.7;
+}
+
+.plateRules span:first-child {
+  width: 100%;
+  opacity: 0.75;
+}
+
+.plateRules span:last-child {
+  width: 52%;
+  opacity: 0.45;
 }
 
 .plateRole {
@@ -186,6 +267,10 @@
 }
 
 @media (min-width: 64rem) {
+  .scrollHint {
+    display: flex;
+  }
+
   .hero {
     padding-block: calc(7.5rem + var(--section-y) * 0.4) calc(var(--section-y) * 1.05);
     min-height: 100svh;

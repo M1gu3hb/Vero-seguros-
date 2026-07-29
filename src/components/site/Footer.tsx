@@ -12,6 +12,12 @@ export function Footer({ settings, year }: FooterProps) {
   return (
     <footer className={styles.footer}>
       <div className="container">
+        <div className={styles.colophon} aria-hidden="true">
+          <span className={styles.colophonRule} />
+          <Monogram className={styles.colophonMark} height="1.1rem" />
+          <span className={styles.colophonRule} />
+        </div>
+
         <div className={styles.top}>
           <div className={styles.brand}>
             <Monogram className={styles.mark} height="1.4rem" />

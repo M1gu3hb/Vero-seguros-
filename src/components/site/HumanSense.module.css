@@ -1,6 +1,8 @@
 .section {
   position: relative;
-  background: var(--navy);
+  background-color: var(--navy);
+  background-image: var(--grain);
+  background-blend-mode: multiply;
   color: var(--on-navy);
   overflow: hidden;
 }
@@ -12,6 +14,18 @@
   width: 110%;
   height: 9rem;
   color: rgba(248, 239, 230, 0.14);
+  pointer-events: none;
+}
+
+/* Monograma de fondo, muy tenue, anclado a la derecha */
+.watermark {
+  position: absolute;
+  inset-block-start: 12%;
+  inset-inline-end: -10%;
+  width: 46%;
+  max-width: 34rem;
+  color: var(--cream);
+  opacity: 0.035;
   pointer-events: none;
 }
 
@@ -34,17 +48,44 @@
 }
 
 .item {
+  position: relative;
   display: grid;
   gap: 0.4rem;
   padding-block: clamp(1.25rem, 2.5vw, 1.75rem);
   border-block-end: 1px solid var(--on-navy-rule);
+  transition: padding-inline-start var(--dur) var(--ease);
+}
+
+/* Filete dorado que recorre la regla inferior al pasar el cursor */
+.item::after {
+  content: '';
+  position: absolute;
+  inset-block-end: -1px;
+  inset-inline-start: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur) var(--ease);
+}
+
+.item:hover::after {
+  transform: scaleX(1);
 }
 
 .itemIndex {
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
   color: var(--gold-soft);
+  opacity: 0.85;
+  transition: opacity var(--dur-fast) var(--ease-soft);
+}
+
+.item:hover .itemIndex {
+  opacity: 1;
 }
 
 .itemTitle {
@@ -52,6 +93,11 @@
   font-size: var(--step-2);
   line-height: 1.2;
   color: var(--on-navy);
+  transition: transform var(--dur) var(--ease);
+}
+
+.item:hover .itemTitle {
+  transform: translateX(3px);
 }
 
 .itemText {

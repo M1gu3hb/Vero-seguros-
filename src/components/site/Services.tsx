@@ -1,5 +1,6 @@
 import { Reveal } from '@/components/motion/Reveal'
 import { ServiceIcon } from '@/components/site/ServiceIcon'
+import { SectionEyebrow } from '@/components/site/SectionHeading'
 import { servicesSection, type Service } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
 import styles from './Services.module.css'
@@ -30,10 +31,10 @@ export function Services({ services }: ServicesProps) {
       className={`section ${styles.section}`}
       aria-labelledby="servicios-titulo"
     >
-      <div className="container">
+      <div className="container ruled">
         <div className={styles.head}>
           <Reveal>
-            <p className="eyebrow">{servicesSection.eyebrow}</p>
+            <SectionEyebrow index="01" label={servicesSection.eyebrow} />
             <h2 id="servicios-titulo" className={styles.title}>
               {servicesSection.title}
             </h2>
@@ -63,8 +64,14 @@ export function Services({ services }: ServicesProps) {
                   />
                 </svg>
 
+                <span className={styles.ghostIndex} aria-hidden="true">
+                  {formatIndex(index)}
+                </span>
+
                 <div className={styles.featureTop}>
-                  <ServiceIcon name={service.icon} className={styles.icon} />
+                  <span className={styles.medallion}>
+                    <ServiceIcon name={service.icon} className={styles.icon} />
+                  </span>
                   <span className={styles.index} aria-hidden="true">
                     {formatIndex(index)}
                   </span>

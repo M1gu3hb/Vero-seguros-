@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { Reveal } from '@/components/motion/Reveal'
+import { SectionEyebrow } from '@/components/site/SectionHeading'
 import { insurersSection, type Insurer } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
 import styles from './Insurers.module.css'
@@ -44,8 +45,22 @@ function InsurerMark({ insurer }: { insurer: Insurer }) {
  * foco, y desaparece por completo si el sistema pide movimiento reducido: en
  * ese caso se muestra la lista estática.
  */
+/** Ancho mínimo aproximado de cada celda, en píxeles (ver el módulo CSS). */
+const CELL_WIDTH = 208
+/** Ancho de pantalla más amplio que se contempla. */
+const WIDEST_VIEWPORT = 1920
+
 export function Insurers({ insurers }: InsurersProps) {
   if (insurers.length === 0) return null
+
+  /*
+   * La cinta avanza desplazando cada copia un 100 % de su propio ancho. Para
+   * que no aparezca un hueco al final hacen falta suficientes copias como para
+   * cubrir la pantalla incluso después de ese desplazamiento. Con muchas
+   * aseguradoras basta con dos; con tres o cuatro hacen falta más.
+   */
+  const trackWidth = Math.max(1, insurers.length * CELL_WIDTH)
+  const trackCount = Math.max(2, Math.ceil(WIDEST_VIEWPORT / trackWidth) + 1)
 
   return (
     <section
@@ -53,10 +68,10 @@ export function Insurers({ insurers }: InsurersProps) {
       className={`section ${styles.section}`}
       aria-labelledby="aseguradoras-titulo"
     >
-      <div className="container">
+      <div className="container ruled">
         <div className={styles.head}>
           <Reveal>
-            <p className="eyebrow">{insurersSection.eyebrow}</p>
+            <SectionEyebrow index="05" label={insurersSection.eyebrow} />
             <h2 id="aseguradoras-titulo" className={styles.title}>
               {insurersSection.title}
             </h2>
@@ -66,22 +81,23 @@ export function Insurers({ insurers }: InsurersProps) {
 
       <Reveal y={12}>
         <div className={styles.marquee}>
-          {/* Lista real y accesible: el lector de pantalla lee ésta una sola vez */}
-          <ul className={styles.marqueeTrack}>
-            {insurers.map((insurer) => (
-              <li key={insurer.id} className={styles.item}>
-                <InsurerMark insurer={insurer} />
-              </li>
-            ))}
-          </ul>
-          {/* Copia puramente visual para que la cinta no tenga huecos */}
-          <ul className={styles.marqueeTrack} aria-hidden="true">
-            {insurers.map((insurer) => (
-              <li key={`echo-${insurer.id}`} className={styles.item}>
-                <InsurerMark insurer={insurer} />
-              </li>
-            ))}
-          </ul>
+          {Array.from({ length: trackCount }, (_, track) => (
+            /*
+             * Sólo la primera copia se anuncia: las demás son puramente
+             * visuales y quedan ocultas para los lectores de pantalla.
+             */
+            <ul
+              key={`track-${track}`}
+              className={styles.marqueeTrack}
+              aria-hidden={track > 0 || undefined}
+            >
+              {insurers.map((insurer) => (
+                <li key={`${track}-${insurer.id}`} className={styles.item}>
+                  <InsurerMark insurer={insurer} />
+                </li>
+              ))}
+            </ul>
+          ))}
         </div>
 
         <div className="container">

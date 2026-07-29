@@ -1,6 +1,7 @@
 import Image from 'next/image'
 
 import { Monogram } from '@/components/brand/Monogram'
+import { CropMarks } from '@/components/site/SectionHeading'
 import { Trajectory } from '@/components/brand/Trajectory'
 import { ParallaxMark } from '@/components/motion/ParallaxMark'
 import { Reveal } from '@/components/motion/Reveal'
@@ -25,7 +26,7 @@ export function Hero({ settings, whatsappUrl, mailtoUrl }: HeroProps) {
         <Trajectory className={styles.curve} withEcho />
       </div>
 
-      <div className={`container ${styles.grid}`}>
+      <div className={`container ruled ${styles.grid}`}>
         <div>
           <Reveal y={12}>
             <p className="eyebrow">{settings.heroEyebrow}</p>
@@ -71,7 +72,8 @@ export function Hero({ settings, whatsappUrl, mailtoUrl }: HeroProps) {
         </div>
 
         <Reveal delay={0.18} y={24}>
-          <div className={styles.plate}>
+          <div className={`cropped ${styles.plate}`}>
+            <CropMarks />
             {hasPhoto && settings.heroImageUrl ? (
               <div className={styles.photoFrame}>
                 <Image
@@ -88,7 +90,10 @@ export function Hero({ settings, whatsappUrl, mailtoUrl }: HeroProps) {
             )}
 
             <p className={styles.plateName}>{settings.brandName}</p>
-            <span className={styles.plateRule} aria-hidden="true" />
+            <span className={styles.plateRules} aria-hidden="true">
+              <span />
+              <span />
+            </span>
             <p className={styles.plateRole}>{settings.brandRole}</p>
 
             <p className={styles.plateTagline}>{settings.brandTagline}</p>
@@ -112,6 +117,11 @@ export function Hero({ settings, whatsappUrl, mailtoUrl }: HeroProps) {
           </div>
         </Reveal>
       </div>
+
+      <span className={styles.scrollHint} aria-hidden="true">
+        Desliza
+        <span className={styles.scrollHintLine} />
+      </span>
     </section>
   )
 }

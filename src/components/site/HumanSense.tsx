@@ -1,5 +1,7 @@
+import { Monogram } from '@/components/brand/Monogram'
 import { Trajectory } from '@/components/brand/Trajectory'
 import { Reveal } from '@/components/motion/Reveal'
+import { SectionEyebrow } from '@/components/site/SectionHeading'
 import { humanSection } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
 import styles from './HumanSense.module.css'
@@ -13,10 +15,13 @@ export function HumanSense() {
       aria-labelledby="humano-titulo"
     >
       <Trajectory className={styles.curve} />
+      <div className={styles.watermark} aria-hidden="true">
+        <Monogram fluid />
+      </div>
 
-      <div className={`container ${styles.grid}`}>
+      <div className={`container ruled ruled--on-navy ${styles.grid}`}>
         <Reveal>
-          <p className="eyebrow eyebrow--on-navy">{humanSection.eyebrow}</p>
+          <SectionEyebrow index="02" label={humanSection.eyebrow} onNavy />
           <h2 id="humano-titulo" className={styles.title}>
             {humanSection.title}
           </h2>

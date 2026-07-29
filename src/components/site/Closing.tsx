@@ -1,6 +1,7 @@
 import { Monogram } from '@/components/brand/Monogram'
 import { Trajectory } from '@/components/brand/Trajectory'
 import { Reveal } from '@/components/motion/Reveal'
+import { SectionEyebrow } from '@/components/site/SectionHeading'
 import { closingSection, type SiteSettings } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
 import styles from './Closing.module.css'
@@ -24,9 +25,9 @@ export function Closing({ settings, whatsappUrl, mailtoUrl }: ClosingProps) {
         <Monogram fluid />
       </div>
 
-      <div className={`container ${styles.inner}`}>
+      <div className={`container ruled ruled--on-navy ${styles.inner}`}>
         <Reveal>
-          <p className="eyebrow eyebrow--on-navy">{closingSection.eyebrow}</p>
+          <SectionEyebrow index="07" label={closingSection.eyebrow} onNavy />
           <h2 id="contacto-titulo" className={styles.title}>
             {closingSection.title}
           </h2>
