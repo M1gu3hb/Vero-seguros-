@@ -1,12 +1,18 @@
 import { expect, test } from '@playwright/test'
 
+/*
+ * Se usa `||` y no `??`: en GitHub Actions una variable no configurada llega
+ * como cadena vacía, y una URL vacía haría que la petición se resolviera
+ * contra la propia aplicación en lugar de contra Supabase.
+ */
 const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://vuzyhbiwnnngeohysxcw.supabase.co'
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || 'https://vuzyhbiwnnngeohysxcw.supabase.co'
 const ANON_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'sb_publishable_26WQI_ceor1wl2Nk43BR1A_NH1zJYDK'
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
+  'sb_publishable_26WQI_ceor1wl2Nk43BR1A_NH1zJYDK'
 
-const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD
+const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL?.trim()
+const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD?.trim()
 
 test.describe('acceso al administrador', () => {
   test('un visitante sin sesión es enviado a /admin/login', async ({ page }) => {
@@ -38,6 +44,8 @@ test.describe('acceso al administrador', () => {
 
 test.describe('protección de la base de datos', () => {
   test('un usuario no autorizado no puede escribir', async ({ request }) => {
+    expect(SUPABASE_URL).toMatch(/^https:\/\//)
+
     const headers = {
       apikey: ANON_KEY,
       Authorization: `Bearer ${ANON_KEY}`,
