@@ -346,6 +346,13 @@ hr {
 }
 
 /* ── Movimiento reducido ──────────────────────────────────────────────────── */
+/*
+ * El CSS es la fuente autoritativa de esta preferencia, así que aquí se fija
+ * el estado final de todo lo animado con JavaScript. `!important` gana a los
+ * estilos en línea que escribe la librería de animación, de modo que el
+ * resultado no depende de que un hook se haya inicializado a tiempo ni de la
+ * hidratación: el contenido siempre queda visible y legible.
+ */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -358,5 +365,22 @@ hr {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* Apariciones al hacer scroll: visibles y en su sitio desde el principio */
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Monograma de fondo: sin desplazamiento */
+  [data-parallax] {
+    transform: none !important;
+  }
+
+  /* Curvas de trayectoria: trazadas por completo, sin animación */
+  [data-draw] {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
   }
 }
