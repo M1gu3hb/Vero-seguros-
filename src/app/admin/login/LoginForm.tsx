@@ -1,65 +1,52 @@
 'use client'
 
-import { useId, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useActionState, useId, useState } from 'react'
 
+import { signIn } from '@/actions/auth'
+import { idleState } from '@/actions/types'
 import { loginSchema } from '@/lib/schemas'
-import { createClient } from '@/lib/supabase/client'
 import styles from './login.module.css'
 
 /**
  * Inicio de sesión.
  *
- * La contraseña se verifica siempre en Supabase; aquí sólo se valida el
- * formato antes de enviarla. No hay ninguna comparación de credenciales en el
- * navegador ni contraseñas en el código.
+ * La contraseña no se comprueba aquí ni viaja a Supabase desde el navegador:
+ * se envía al propio servidor, que es quien habla con Supabase, cuenta los
+ * intentos fallidos y devuelve la sesión en cookies que el navegador no puede
+ * leer. En esta pantalla no hay ninguna contraseña ni ninguna comparación.
+ *
+ * Lo único que se mira antes de enviar es la forma —que el correo parezca un
+ * correo y que la contraseña tenga largo suficiente—, para no gastar un viaje
+ * de ida y vuelta en un dedazo.
  */
 export function LoginForm() {
-  const router = useRouter()
   const emailId = useId()
   const passwordId = useId()
-  const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState(false)
+  const [state, formAction, pending] = useActionState(signIn, idleState)
+  const [formatoInvalido, setFormatoInvalido] = useState<string | null>(null)
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(null)
-
-    const formData = new FormData(event.currentTarget)
-    const parsed = loginSchema.safeParse({
-      email: String(formData.get('email') ?? ''),
-      password: String(formData.get('password') ?? ''),
-    })
-
-    if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Revisa los datos.')
-      return
-    }
-
-    setPending(true)
-    try {
-      const supabase = createClient()
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: parsed.data.email,
-        password: parsed.data.password,
-      })
-
-      if (signInError) {
-        setError('Correo o contraseña incorrectos.')
-        return
-      }
-
-      router.replace('/admin')
-      router.refresh()
-    } catch {
-      setError('No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.')
-    } finally {
-      setPending(false)
-    }
-  }
+  const error = formatoInvalido ?? (state.status === 'error' ? state.message : null)
 
   return (
-    <form className={styles.form} onSubmit={onSubmit} noValidate>
+    <form
+      className={styles.form}
+      action={formAction}
+      onSubmit={(event) => {
+        const parsed = loginSchema.safeParse({
+          email: String(new FormData(event.currentTarget).get('email') ?? ''),
+          password: String(new FormData(event.currentTarget).get('password') ?? ''),
+        })
+
+        if (!parsed.success) {
+          event.preventDefault()
+          setFormatoInvalido(parsed.error.issues[0]?.message ?? 'Revisa los datos.')
+          return
+        }
+
+        setFormatoInvalido(null)
+      }}
+      noValidate
+    >
       {error ? (
         <p className={styles.error} role="alert">
           {error}

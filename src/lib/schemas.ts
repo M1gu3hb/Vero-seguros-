@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { SUPABASE_URL } from '@/lib/supabase/config'
+
 /**
  * Validación compartida entre el formulario (cliente) y las Server Actions
  * (servidor). Los límites coinciden con los `check` de la base de datos, de
@@ -28,24 +30,61 @@ export function normalizeText(value: string): string {
 const multiline = (min: number, max: number, label: string) =>
   z.string().transform(normalizeText).pipe(trimmed(min, max, label))
 
+/**
+ * ¿Es una imagen que este sitio puede servir?
+ *
+ * Sólo dos procedencias: el almacenamiento del propio proyecto —donde va a
+ * parar lo que se sube desde el administrador— y las rutas del propio sitio,
+ * que es donde viven los logotipos que vienen con el proyecto.
+ *
+ * Se comprueba aquí y no sólo en el navegador porque una dirección pegada a
+ * mano podría apuntar a cualquier servidor: la página cargaría una imagen de
+ * un tercero, que vería la dirección de cada visitante y podría cambiarla por
+ * otra cosa cuando quisiera. Es además la misma lista que admite el
+ * optimizador de imágenes, así que una dirección de fuera ni siquiera llegaría
+ * a verse.
+ */
+const ALMACEN_PERMITIDO = (() => {
+  try {
+    return new URL(SUPABASE_URL).hostname
+  } catch {
+    return null
+  }
+})()
+
+export function esImagenPermitida(value: string): boolean {
+  if (value.startsWith('/')) return /^\/[a-zA-Z0-9][^\s]*$/.test(value)
+
+  let url: URL
+  try {
+    url = new URL(value)
+  } catch {
+    return false
+  }
+
+  if (url.protocol !== 'https:') return false
+  if (!url.pathname.startsWith('/storage/v1/object/public/')) return false
+
+  return ALMACEN_PERMITIDO
+    ? url.hostname === ALMACEN_PERMITIDO
+    : url.hostname.endsWith('.supabase.co')
+}
+
+const MENSAJE_IMAGEN =
+  'La imagen tiene que estar subida desde este mismo administrador. No se admiten direcciones de otros sitios.'
+
 const optionalUrl = z
-  .union([z.string().trim().url('La dirección de la imagen no es válida.'), z.literal('')])
+  .union([z.string().trim(), z.literal('')])
   .nullish()
   .transform((value) => (value ? value : null))
+  .refine((value) => value === null || esImagenPermitida(value), MENSAJE_IMAGEN)
 
 /*
  * Los logotipos que vienen con el proyecto viven en `public/brand/`, así que
- * aquí se admite tanto una URL absoluta (lo que sube el CMS a Supabase
- * Storage) como una ruta del propio sitio.
+ * aquí se admite tanto el almacenamiento del proyecto —lo que sube el CMS—
+ * como una ruta del propio sitio.
  */
-const optionalImageRef = z
-  .union([
-    z.string().trim().url(),
-    z.string().trim().regex(/^\/[a-zA-Z0-9][^\s]*$/, 'La ruta de la imagen no es válida.'),
-    z.literal(''),
-  ])
-  .nullish()
-  .transform((value) => (value ? value : null))
+const optionalImageRef = optionalUrl
 
 const optionalText = (max: number) =>
   z
@@ -156,20 +195,36 @@ export const insurerSchema = z.object({
  * Un lote de frases, tal como sale del administrador.
  *
  * El largo de cada una lo fija el catálogo (`src/content/texts.ts`), así que
- * aquí sólo se comprueba la forma: claves conocidas y texto no vacío. La
- * comprobación fina va en la acción, que sí tiene el catálogo a mano.
+ * aquí sólo se comprueba la forma. La comprobación fina va en la acción, que
+ * sí tiene el catálogo a mano.
+ *
+ * Los topes de cantidad y de tamaño no están por si Verónica escribe de más
+ * —el catálogo entero no llega a cien frases—, sino porque este campo llega
+ * como JSON y no debería poder crecer sin límite.
  */
+export const MAX_TEXTOS_POR_LOTE = 200
+export const MAX_LARGO_TEXTO = 4000
+/** Tope del campo JSON completo, antes siquiera de interpretarlo. */
+export const MAX_BYTES_LOTE = 256 * 1024
+
 export const textsSchema = z.object({
   values: z
-    .record(z.string(), z.string())
-    .refine((value) => Object.keys(value).length > 0, 'No hay nada que guardar.'),
+    .record(z.string().max(120), z.string().max(MAX_LARGO_TEXTO, 'Ese texto es demasiado largo.'))
+    .refine((value) => Object.keys(value).length > 0, 'No hay nada que guardar.')
+    .refine(
+      (value) => Object.keys(value).length <= MAX_TEXTOS_POR_LOTE,
+      'Demasiados textos en un mismo guardado.',
+    ),
 })
 
-/* ── Reordenamiento ─────────────────────────────────────────────────────── */
+/* ── Reordenamiento y borrado ───────────────────────────────────────────── */
 
 export const reorderSchema = z.object({
   ids: z.array(z.string().uuid()).min(1, 'No hay elementos que ordenar.').max(200),
 })
+
+/** Un identificador que llega de un formulario, antes de tocar la base. */
+export const idSchema = z.string().uuid('El identificador no es válido.')
 
 /* ── Sesión ─────────────────────────────────────────────────────────────── */
 

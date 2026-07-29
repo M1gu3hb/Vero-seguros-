@@ -23,10 +23,11 @@ personales y sin funciones que el proyecto no necesita.
 6. [Variables de entorno](#variables-de-entorno)
 7. [Supabase: base de datos, migraciones y almacenamiento](#supabase-base-de-datos-migraciones-y-almacenamiento)
 8. [Crear la primera administradora](#crear-la-primera-administradora)
-9. [Pruebas](#pruebas)
-10. [Build y despliegue](#build-y-despliegue)
-11. [Mantenimiento del contenido](#mantenimiento-del-contenido)
-12. [Decisiones de diseño](#decisiones-de-diseño)
+9. [Seguridad](#seguridad)
+10. [Pruebas](#pruebas)
+11. [Build y despliegue](#build-y-despliegue)
+12. [Mantenimiento del contenido](#mantenimiento-del-contenido)
+13. [Decisiones de diseño](#decisiones-de-diseño)
 
 ---
 
@@ -254,6 +255,8 @@ Copia `.env.example` a `.env.local`.
 | `site_settings` | Fila única (`id = 1`) con identidad, contacto, inicio, biografía y promociones |
 | `services` | Los ramos de seguro: nombre, slug, descripción, icono, orden y visibilidad |
 | `insurers` | Las aseguradoras: nombre, logotipo opcional, orden y visibilidad |
+| `site_texts` | Las frases sueltas de la página, por clave |
+| `content_audit` | Bitácora: cada cambio de contenido, con quién y cuándo |
 | `admin_users` | Los usuarios autorizados a editar |
 
 Además:
@@ -263,11 +266,13 @@ Además:
   políticas.
 - Todas las tablas tienen **RLS activo**. El público sólo lee lo publicado
   (`is_visible`); la escritura exige `is_admin()`.
+- Los permisos de tabla están al mínimo: `anon` sólo lee, y `authenticated`
+  tiene exactamente lo que la aplicación usa. Ver [Seguridad](#seguridad).
 - Un disparador mantiene `updated_at` al día y hay índices por `sort_order` y
   por visibilidad.
-- El bucket `site-media` es de lectura pública y escritura sólo para
-  administradoras, con un límite de 3 MB y tipos restringidos a JPG, PNG, WebP
-  y AVIF.
+- El bucket `site-media` sirve sus imágenes por dirección pública, pero no se
+  puede listar; la escritura es sólo para administradoras, con un límite de
+  3 MB y tipos restringidos a JPG, PNG, WebP y AVIF.
 
 ### Aplicar las migraciones
 
@@ -277,6 +282,11 @@ Los archivos viven en `supabase/migrations/` y son idempotentes:
 | --- | --- |
 | `0001_schema.sql` | Tablas, función `is_admin()`, disparadores, índices, políticas RLS y bucket |
 | `0002_seed.sql` | Contenido inicial: ajustes, ocho servicios y diez aseguradoras |
+| `0003_insurer_logos.sql` | Logotipos de las aseguradoras |
+| `0004_detalles_pagos_planseguro.sql` | Qué cubre cada seguro, plazos de pago editables y Plan Seguro |
+| `0005_textos_editables.sql` | `site_texts`: las frases sueltas de la página, por clave |
+| `0006_blindaje.sql` | Permisos de tabla al mínimo y el bucket deja de poder listarse |
+| `0007_bitacora.sql` | `content_audit`: quién cambió qué y cuándo |
 
 Con la CLI de Supabase:
 
@@ -323,6 +333,127 @@ order by a.created_at;
 Para retirar el acceso a alguien basta con borrar su fila de `admin_users`: el
 usuario seguirá existiendo, pero `is_admin()` devolverá `false` y las políticas
 RLS bloquearán cualquier escritura.
+
+---
+
+## Seguridad
+
+Editar el sitio exige el correo y la contraseña de una cuenta que esté en
+`admin_users`. Esa es la única puerta, y no hay ninguna forma de rodearla desde
+fuera. Lo que sigue es cómo está cerrada, capa por capa.
+
+### Cuatro cerraduras, no una
+
+Cada escritura pasa por las cuatro. Si una fallara, las otras tres siguen
+puestas:
+
+| Capa | Qué comprueba | Dónde |
+| --- | --- | --- |
+| **1 · Middleware** | Que haya sesión antes de servir `/admin` | `src/middleware.ts` |
+| **2 · Server Action** | Que la sesión sea de una administradora, y que el dato sea válido | `requireAdmin()` en `src/actions/content.ts` |
+| **3 · Permisos de tabla** | Que el rol tenga siquiera permiso de escritura | migración `0006` |
+| **4 · Row Level Security** | Que la fila concreta se pueda tocar | migraciones `0001`, `0005` |
+
+La capa 3 es la que suele faltar. Supabase concede `all` a `anon` y
+`authenticated` en cada tabla nueva, y ese `all` incluye `TRUNCATE`, que **no
+pasa por Row Level Security**. La migración `0006` deja en cada tabla sólo lo
+que la aplicación usa de verdad, así que hoy un intento de escritura sin sesión
+de administración recibe un «permiso denegado» de la propia base de datos,
+antes incluso de llegar a las políticas.
+
+### La contraseña
+
+- Se comprueba **en el servidor**, contra Supabase. El navegador no habla con
+  Supabase ni una sola vez en la pantalla de acceso, y en el código no hay
+  ninguna contraseña ni ninguna comparación de credenciales.
+- La sesión viaja en cookies `httpOnly`: el JavaScript de la página no puede
+  leerlas.
+- El mensaje de error es el mismo se equivoque en el correo o en la contraseña.
+  Distinguirlos le confirmaría a quien prueba qué correos existen.
+- Hay un freno por intentos (`src/lib/throttle.ts`): diez fallos desde la misma
+  dirección y deja de aceptar intentos durante un minuto. Se suelta solo, así
+  que nadie puede usarlo para dejar a Verónica fuera de su propio panel.
+
+### Lo que se guarda
+
+- Todo texto se valida dos veces con el mismo esquema —en el navegador y en el
+  servidor— y una tercera con los `check` de la base de datos.
+- Las imágenes sólo pueden venir del almacenamiento de este proyecto o del
+  propio sitio. Una dirección pegada a mano que apunte fuera se rechaza: si no,
+  la página cargaría una imagen de un tercero que vería la dirección de cada
+  visitante.
+- Los identificadores tienen que tener forma de UUID antes de tocar la base.
+- El lote de textos tiene tope de tamaño y de cantidad.
+
+### Lo que se puede ver desde fuera
+
+- Las fotos se sirven por su dirección, pero **el bucket no se puede listar**:
+  antes cualquiera podía pedir el índice y descubrir fotos que se subieron y
+  luego se sustituyeron.
+- `admin_users` y la bitácora sólo las lee quien ya es administradora.
+- La `service role key` no se usa en ningún punto del runtime y no debe existir
+  como variable con prefijo `NEXT_PUBLIC_`.
+
+### Bitácora
+
+`content_audit` (migración `0007`) anota cada alta, cambio y baja de contenido:
+qué tabla, qué fila, quién, cuándo, y la fila entera antes y después. La
+escribe un disparador, no la aplicación, así que registra cualquier escritura
+que llegue a la base —incluidas las hechas desde el propio panel de Supabase—.
+Nadie puede modificarla: no existe ninguna política de escritura.
+
+```sql
+select ocurrio_en, correo, tabla, accion, fila
+from public.content_audit
+order by ocurrio_en desc
+limit 20;
+```
+
+### Cabeceras
+
+`Content-Security-Policy` es la lista de lo que el navegador tiene permitido
+cargar. Hay dos, porque las dos mitades del sitio son distintas
+(`src/lib/security.ts`):
+
+- **Página pública**: se genera de antemano y necesita `unsafe-inline` para los
+  datos que Next.js incrusta. A cambio su `connect-src` es sólo `'self'`: no
+  habla con nadie, ni siquiera con Supabase.
+- **Administrador**: cada respuesta lleva su propia firma (`nonce`) y sólo se
+  ejecuta el código que la trae. Ahí no hay `unsafe-inline` — que es donde
+  importa, porque es la parte con sesión. Por eso `/admin` y `/admin/login` se
+  generan en cada visita: una página guardada de antemano llevaría siempre la
+  misma firma.
+
+Además: `Strict-Transport-Security`, `X-Frame-Options: DENY`, `nosniff`,
+`Referrer-Policy`, `Permissions-Policy` y `X-Robots-Tag: noindex` en `/admin`.
+
+### Dos ajustes que sólo se cambian desde el panel de Supabase
+
+No se pueden poner desde el código ni desde una migración, y **este proyecto de
+Supabase lo comparten varios sitios**, así que conviene comprobar los demás
+antes de tocarlos:
+
+1. **Cerrar el registro público.** _Authentication → Sign In / Providers →
+   Email → «Allow new users to sign up»_, apagado. Hoy está abierto: cualquiera
+   puede crear una cuenta. No podría editar nada —haría falta estar en
+   `admin_users`—, pero tampoco tiene por qué poder crearla.
+2. **Contraseñas filtradas.** _Authentication → Policies → «Leaked password
+   protection»_, encendido. Comprueba contra HaveIBeenPwned que la contraseña
+   no aparezca en ninguna filtración conocida.
+
+### Avisos que se dejan a propósito
+
+- `is_admin()` la puede ejecutar cualquiera. Es necesario: las políticas de
+  lectura de la página pública la llaman, y una función que el rol no puede
+  ejecutar hace fallar la consulta entera —comprobado—. Lo único que devuelve
+  es si **quien pregunta** es administradora; a un visitante le dice `false`.
+- `rls_auto_enable()` aparece como ejecutable, pero es una función de disparador
+  de DDL: la base se niega a devolver su tipo por la API. Está ahí como red de
+  seguridad, para que cualquier tabla nueva de `public` nazca con Row Level
+  Security activado.
+- Los avisos sobre `jardines.solicitudes` y los buckets `planos` y `sitio` son
+  de otro sitio que vive en el mismo proyecto de Supabase. No se tocan desde
+  aquí.
 
 ---
 

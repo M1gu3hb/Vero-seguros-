@@ -10,6 +10,16 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
+/*
+ * Se genera en cada visita, no de antemano.
+ *
+ * Es lo que permite que la respuesta lleve su propia firma —el `nonce` de la
+ * política de seguridad— y que sólo se ejecute el código firmado con ella. Una
+ * página guardada de antemano llevaría siempre la misma, que es como no tener
+ * ninguna.
+ */
+export const dynamic = 'force-dynamic'
+
 export default function LoginPage() {
   return (
     <main className={styles.wrap}>
