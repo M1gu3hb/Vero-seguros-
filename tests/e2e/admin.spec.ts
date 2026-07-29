@@ -27,6 +27,29 @@ test.describe('acceso al administrador', () => {
     await expect(page.locator('input[name="password"]')).toHaveAttribute('type', 'password')
   })
 
+  /*
+   * El ojo para ver la contraseña. Escribirla a ciegas se equivoca, y el error
+   * de acceso no dice en qué: sólo que no entras.
+   */
+  test('la contraseña se puede ver y volver a tapar', async ({ page }) => {
+    await page.goto('/admin/login')
+
+    const clave = page.locator('input[name="password"]')
+    const ojo = page.locator('.ojoClave')
+
+    await clave.fill('una-contrasena-escrita')
+    await expect(clave).toHaveAttribute('type', 'password')
+
+    await ojo.click()
+    await expect(clave).toHaveAttribute('type', 'text')
+    // Lo escrito no se pierde, y seguimos en la misma pantalla: el ojo no envía.
+    await expect(clave).toHaveValue('una-contrasena-escrita')
+    await expect(page).toHaveURL(/\/admin\/login$/)
+
+    await ojo.click()
+    await expect(clave).toHaveAttribute('type', 'password')
+  })
+
   test('rechaza credenciales vacías o mal formadas sin llamar al servidor', async ({ page }) => {
     await page.goto('/admin/login')
     await page.locator('input[name="email"]').fill('no-es-correo')
@@ -332,6 +355,37 @@ test.describe('sesión de la administradora', () => {
 
     await page.keyboard.press('Escape')
     await expect(page.getByRole('alertdialog')).toBeHidden()
+  })
+
+  /*
+   * No se cambia la contraseña de verdad —dejaría a Verónica fuera si la prueba
+   * se cortara a medio camino—, pero sí se comprueba que el formulario está
+   * completo, que no acepta lo que no debe, y que **conserva lo escrito** al
+   * rechazarlo: si lo borrara, un dedazo obligaría a teclear las dos otra vez.
+   */
+  test('el cambio de contraseña pide dos veces lo mismo y con largo suficiente', async ({
+    page,
+  }) => {
+    await page.getByRole('button', { name: 'Tu cuenta', exact: true }).click()
+
+    const cuenta = page.locator('form:has(input[name="confirm"])')
+    const nueva = cuenta.locator('input[name="password"]')
+    const repetida = cuenta.locator('input[name="confirm"]')
+
+    await expect(cuenta.locator('.ojoClave')).toHaveCount(2)
+
+    await nueva.fill('corta')
+    await repetida.fill('corta')
+    await page.getByRole('button', { name: 'Cambiar contraseña' }).click()
+    await expect(cuenta.getByText(/10 caracteres/)).toBeVisible()
+    await expect(nueva).toHaveValue('corta')
+
+    await nueva.fill('una-contrasena-larga')
+    await repetida.fill('otra-cosa-distinta')
+    await page.getByRole('button', { name: 'Cambiar contraseña' }).click()
+    await expect(cuenta.getByText(/no coinciden/)).toBeVisible()
+    await expect(nueva).toHaveValue('una-contrasena-larga')
+    await expect(repetida).toHaveValue('otra-cosa-distinta')
   })
 
   test('puede cerrar sesión', async ({ page }) => {

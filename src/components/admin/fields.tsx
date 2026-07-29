@@ -3,6 +3,7 @@
 import { useId, useState } from 'react'
 
 import styles from '@/app/admin/admin.module.css'
+import { OjoContrasena, useRevelado } from '@/components/ui/OjoContrasena'
 
 type BaseProps = {
   name: string
@@ -56,6 +57,35 @@ export function TextField({
   const [length, setLength] = useState((value ?? defaultValue).length)
   const invalid = Boolean(error?.length)
 
+  /* Una contraseña se puede mirar: escribirla a ciegas es la mitad de los
+     «no me deja entrar». El campo sigue siendo `password` mientras esté tapada,
+     que es lo que hace que el navegador no la muestre ni la lea en voz alta. */
+  const esClave = type === 'password'
+  const [visible, alternarVisible] = useRevelado()
+
+  const campo = (
+    <input
+      id={id}
+      name={name}
+      type={esClave && visible ? 'text' : type}
+      inputMode={inputMode}
+      autoComplete={autoComplete}
+      placeholder={placeholder}
+      className={styles.input}
+      {...(controlado ? { value } : { defaultValue })}
+      required={required}
+      maxLength={maxLength}
+      aria-invalid={invalid || undefined}
+      aria-describedby={
+        [hint ? hintId : null, invalid ? errorId : null].filter(Boolean).join(' ') || undefined
+      }
+      onChange={(event) => {
+        setLength(event.currentTarget.value.length)
+        onValueChange?.(event.currentTarget.value)
+      }}
+    />
+  )
+
   return (
     <div className={styles.field}>
       <label className={styles.label} htmlFor={id}>
@@ -67,26 +97,14 @@ export function TextField({
           {hint}
         </p>
       ) : null}
-      <input
-        id={id}
-        name={name}
-        type={type}
-        inputMode={inputMode}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        className={styles.input}
-        {...(controlado ? { value } : { defaultValue })}
-        required={required}
-        maxLength={maxLength}
-        aria-invalid={invalid || undefined}
-        aria-describedby={
-          [hint ? hintId : null, invalid ? errorId : null].filter(Boolean).join(' ') || undefined
-        }
-        onChange={(event) => {
-          setLength(event.currentTarget.value.length)
-          onValueChange?.(event.currentTarget.value)
-        }}
-      />
+      {esClave ? (
+        <span className="campoClave">
+          {campo}
+          <OjoContrasena visible={visible} onToggle={alternarVisible} />
+        </span>
+      ) : (
+        campo
+      )}
       {maxLength ? (
         <span className={styles.counter}>
           {length} / {maxLength}

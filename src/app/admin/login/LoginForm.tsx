@@ -4,6 +4,7 @@ import { useActionState, useId, useState } from 'react'
 
 import { signIn } from '@/actions/auth'
 import { idleState } from '@/actions/types'
+import { OjoContrasena, useRevelado } from '@/components/ui/OjoContrasena'
 import { loginSchema } from '@/lib/schemas'
 import styles from './login.module.css'
 
@@ -24,6 +25,7 @@ export function LoginForm() {
   const passwordId = useId()
   const [state, formAction, pending] = useActionState(signIn, idleState)
   const [formatoInvalido, setFormatoInvalido] = useState<string | null>(null)
+  const [claveVisible, alternarClave] = useRevelado()
 
   const error = formatoInvalido ?? (state.status === 'error' ? state.message : null)
 
@@ -73,14 +75,17 @@ export function LoginForm() {
         <label className={styles.label} htmlFor={passwordId}>
           Contraseña
         </label>
-        <input
-          id={passwordId}
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          className={styles.input}
-          required
-        />
+        <span className="campoClave">
+          <input
+            id={passwordId}
+            name="password"
+            type={claveVisible ? 'text' : 'password'}
+            autoComplete="current-password"
+            className={styles.input}
+            required
+          />
+          <OjoContrasena visible={claveVisible} onToggle={alternarClave} />
+        </span>
       </div>
 
       <button type="submit" className={`btn btn--primary ${styles.submit}`} disabled={pending}>
