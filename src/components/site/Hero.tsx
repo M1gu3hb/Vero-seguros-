@@ -5,6 +5,7 @@ import { CropMarks } from '@/components/site/SectionHeading'
 import { Trajectory } from '@/components/brand/Trajectory'
 import { ParallaxMark } from '@/components/motion/ParallaxMark'
 import { Reveal } from '@/components/motion/Reveal'
+import { MailLink } from '@/components/site/MailLink'
 import { SWASH_PATH } from '@/lib/brand'
 import { SECTIONS } from '@/lib/site'
 import type { SiteSettings } from '@/content/site-content'
@@ -14,9 +15,10 @@ type HeroProps = {
   settings: SiteSettings
   whatsappUrl: string | null
   mailtoUrl: string
+  webmailUrl: string
 }
 
-export function Hero({ settings, whatsappUrl, mailtoUrl }: HeroProps) {
+export function Hero({ settings, whatsappUrl, mailtoUrl, webmailUrl }: HeroProps) {
   const hasPhoto = Boolean(settings.heroImageUrl)
 
   return (
@@ -57,9 +59,9 @@ export function Hero({ settings, whatsappUrl, mailtoUrl }: HeroProps) {
                   </span>
                 </a>
               ) : null}
-              <a className="btn btn--secondary" href={mailtoUrl}>
+              <MailLink className="btn btn--secondary" href={mailtoUrl} webmailHref={webmailUrl}>
                 {settings.heroSecondaryCta}
-              </a>
+              </MailLink>
             </div>
           </Reveal>
 

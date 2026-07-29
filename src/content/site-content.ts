@@ -38,6 +38,10 @@ export type SiteSettings = {
   promosDescription: string
   promosNote: string
   promosVisible: boolean
+  promosInstallmentsLabel: string
+  promosInstallments: string[]
+  promosFrequenciesLabel: string
+  promosFrequencies: string[]
 }
 
 export type Service = {
@@ -45,6 +49,8 @@ export type Service = {
   name: string
   slug: string
   description: string
+  /** Qué cubre el ramo. Se despliega al pulsarlo; puede faltar. */
+  detail: string | null
   icon: string
   sortOrder: number
   isVisible: boolean
@@ -105,8 +111,17 @@ export const defaultSettings: SiteSettings = {
   promosNote:
     'Promociones y facilidades sujetas a disponibilidad, aseguradora, producto, método de pago y condiciones vigentes.',
   promosVisible: true,
+  promosInstallmentsLabel: 'Meses sin intereses en algunas aseguradoras',
+  promosInstallments: ['3 meses', '6 meses', '12 meses'],
+  promosFrequenciesLabel: 'Modalidades de pago',
+  promosFrequencies: ['Mensual', 'Trimestral', 'Semestral', 'Anual'],
 }
 
+/*
+ * El `detail` de cada ramo describe, en general, qué contempla ese tipo de
+ * seguro. No promete coberturas ni aprobaciones: remite siempre a la póliza y
+ * a la aseguradora, que son las que fijan las condiciones.
+ */
 export const defaultServices: Service[] = [
   {
     id: '11111111-1111-4111-8111-000000000001',
@@ -114,6 +129,8 @@ export const defaultServices: Service[] = [
     slug: 'vida',
     description:
       'Alternativas pensadas para brindar protección financiera a quienes más dependen de ti.',
+    detail:
+      'Paga una suma asegurada a las personas que tú designas como beneficiarias si llegas a faltar durante la vigencia de la póliza. Según el plan puede sumar coberturas adicionales por invalidez total y permanente, muerte accidental o enfermedades graves, y hay productos que combinan la protección con un componente de ahorro o inversión. La suma asegurada, los beneficiarios y las coberturas adicionales se definen al contratar.',
     icon: 'vida',
     sortOrder: 1,
     isVisible: true,
@@ -124,6 +141,8 @@ export const defaultServices: Service[] = [
     slug: 'gastos-medicos-mayores',
     description:
       'Orientación para comparar coberturas, deducibles y opciones de atención según tus necesidades.',
+    detail:
+      'Cubre los gastos de atención médica y hospitalaria derivados de un accidente o de una enfermedad cubierta: honorarios, hospitalización, estudios, medicamentos y cirugía, conforme a la red y a las condiciones del plan. Opera con una suma asegurada, un deducible y un coaseguro que se eligen al contratar. Existen periodos de espera y exclusiones —entre ellas los padecimientos preexistentes— que conviene revisar con calma antes de decidir.',
     icon: 'salud',
     sortOrder: 2,
     isVisible: true,
@@ -134,6 +153,8 @@ export const defaultServices: Service[] = [
     slug: 'auto',
     description:
       'Opciones para proteger tu vehículo y contar con respaldo ante diferentes imprevistos.',
+    detail:
+      'Responde por los gastos de un accidente. Según la cobertura contratada puede incluir responsabilidad civil por daños a terceros en sus bienes y en sus personas, gastos médicos de los ocupantes, daños materiales al vehículo, robo total y asistencia vial y legal. Se contrata como cobertura amplia, limitada o de responsabilidad civil, y el deducible se pacta desde el inicio.',
     icon: 'auto',
     sortOrder: 3,
     isVisible: true,
@@ -144,6 +165,8 @@ export const defaultServices: Service[] = [
     slug: 'camion',
     description:
       'Soluciones para unidades de carga o de trabajo, de acuerdo con su uso y su operación.',
+    detail:
+      'Pensado para unidades de carga, de pasaje o de trabajo. Contempla responsabilidad civil por daños a terceros, daños materiales a la unidad, robo total y asistencia en carretera, y puede ampliarse con coberturas para la mercancía transportada o para el remolque. Las condiciones dependen del tipo de unidad, de su uso, de su valor y de las rutas en las que opera.',
     icon: 'camion',
     sortOrder: 4,
     isVisible: true,
@@ -154,6 +177,8 @@ export const defaultServices: Service[] = [
     slug: 'responsabilidad-civil',
     description:
       'Alternativas de protección ante daños a terceros, según la actividad y el riesgo.',
+    detail:
+      'Responde por los daños que una persona o una empresa pueda causar a un tercero en su persona o en sus bienes, e incluye los gastos de defensa legal derivados de esa reclamación. Se contrata de acuerdo con la actividad —profesional, comercial, industrial o familiar— y con el nivel de riesgo, y opera hasta un límite máximo de responsabilidad que se define al contratar.',
     icon: 'responsabilidad',
     sortOrder: 5,
     isVisible: true,
@@ -163,6 +188,8 @@ export const defaultServices: Service[] = [
     name: 'Seguro de Hogar',
     slug: 'hogar',
     description: 'Protección para tu vivienda, tus pertenencias y tu patrimonio.',
+    detail:
+      'Protege la vivienda y lo que hay dentro de ella. Según el plan puede cubrir daños al inmueble y a su contenido por incendio, fenómenos naturales, explosión o daños por agua, además de robo con violencia, cristales, responsabilidad civil familiar y servicios de asistencia para el hogar. Se puede contratar como propietario o como inquilino, con sumas aseguradas distintas para el inmueble y para el contenido.',
     icon: 'hogar',
     sortOrder: 6,
     isVisible: true,
@@ -173,6 +200,8 @@ export const defaultServices: Service[] = [
     slug: 'gastos-funerarios',
     description:
       'Previsión y apoyo para evitar que la familia enfrente sola gastos inesperados.',
+    detail:
+      'Cubre los gastos del servicio funerario de la persona asegurada y, en algunos planes, de los familiares que se registren en la póliza. Puede operar mediante el reembolso de los gastos o a través de una red de servicios ya contratados. Suele tener un periodo de espera al inicio de la vigencia, que se indica en las condiciones del plan.',
     icon: 'funerarios',
     sortOrder: 7,
     isVisible: true,
@@ -183,6 +212,8 @@ export const defaultServices: Service[] = [
     slug: 'membresias-de-salud',
     description:
       'Acceso a servicios y beneficios de salud conforme al programa contratado.',
+    detail:
+      'No son un seguro, sino un programa de servicios de salud: dan acceso a consultas médicas, estudios de laboratorio, atención dental y visual, y descuentos en medicamentos y hospitales dentro de una red, a cambio de una cuota. Funcionan como complemento de un seguro de gastos médicos o como una primera opción para quien todavía no cuenta con uno.',
     icon: 'membresia',
     sortOrder: 8,
     isVisible: true,
@@ -208,6 +239,7 @@ const INSURER_LOGOS: Record<string, { url: string; alt: string }> = {
   AXA: { url: '/brand/aseguradoras/axa.svg', alt: 'AXA' },
   Afirme: { url: '/brand/aseguradoras/afirme.svg', alt: 'Afirme' },
   VRIM: { url: '/brand/aseguradoras/vrim.svg', alt: 'VRIM' },
+  'Plan Seguro': { url: '/brand/aseguradoras/plan-seguro.svg', alt: 'Plan Seguro' },
 }
 
 export const defaultInsurers: Insurer[] = [
@@ -221,6 +253,7 @@ export const defaultInsurers: Insurer[] = [
   'Afirme',
   'Mutus',
   'VRIM',
+  'Plan Seguro',
 ].map((name, index) => ({
   id: `22222222-2222-4222-8222-${String(index + 1).padStart(12, '0')}`,
   name,

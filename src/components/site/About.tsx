@@ -2,6 +2,9 @@ import Image from 'next/image'
 
 import { Monogram } from '@/components/brand/Monogram'
 import { Reveal } from '@/components/motion/Reveal'
+import { Tilt } from '@/components/motion/Tilt'
+import { Typed } from '@/components/motion/Typed'
+import { PullQuote } from '@/components/site/PullQuote'
 import { CropMarks, SectionEyebrow } from '@/components/site/SectionHeading'
 import { SECTIONS } from '@/lib/site'
 import type { SiteSettings } from '@/content/site-content'
@@ -13,6 +16,12 @@ type AboutProps = {
 
 /**
  * Sobre Verónica.
+ *
+ * La biografía se escribe sola al llegar a ella, párrafo por párrafo, y la
+ * frase que la resume pasa —en pantallas anchas— justo debajo de la
+ * fotografía, que era donde quedaba el hueco. En el HTML la cita sigue
+ * después del texto, así que en un teléfono se lee en el orden natural: foto,
+ * historia y, al final, la frase.
  *
  * Si todavía no hay una fotografía real, la columna visual se resuelve con
  * una composición tipográfica basada en el monograma: nunca con una persona
@@ -29,6 +38,8 @@ export function About({ settings }: AboutProps) {
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
 
+  const photoAlt = settings.aboutImageAlt ?? `${settings.brandName}, ${settings.brandRole}`
+
   return (
     <section
       id={SECTIONS.about}
@@ -37,33 +48,35 @@ export function About({ settings }: AboutProps) {
     >
       <div className={`container ruled ${styles.grid}`}>
         <Reveal className={styles.aside} y={24}>
-          <figure className={`cropped ${styles.frame}`}>
-            <CropMarks />
-            {settings.aboutImageUrl ? (
-              <div className={styles.photoWrap}>
-                <Image
-                  src={settings.aboutImageUrl}
-                  alt={settings.aboutImageAlt ?? `${settings.brandName}, ${settings.brandRole}`}
-                  fill
-                  className={styles.photo}
-                  sizes="(min-width: 64rem) 26rem, 90vw"
-                />
-              </div>
-            ) : (
-              <div className={styles.mark}>
-                <Monogram className={styles.markGlyph} height="3.5rem" />
-                <span className={styles.markRules} aria-hidden="true">
-                  <span />
-                  <span />
-                </span>
-                <p className={styles.markTagline}>{settings.brandTagline}</p>
-                <p className={styles.markSince}>Agente desde 2018</p>
-              </div>
-            )}
-          </figure>
+          <Tilt className={styles.tilt}>
+            <figure className={`cropped ${styles.frame}`}>
+              <CropMarks />
+              {settings.aboutImageUrl ? (
+                <div className={styles.photoWrap}>
+                  <Image
+                    src={settings.aboutImageUrl}
+                    alt={photoAlt}
+                    fill
+                    className={styles.photo}
+                    sizes="(min-width: 64rem) 26rem, 90vw"
+                  />
+                </div>
+              ) : (
+                <div className={styles.mark}>
+                  <Monogram className={styles.markGlyph} height="3.5rem" />
+                  <span className={styles.markRules} aria-hidden="true">
+                    <span />
+                    <span />
+                  </span>
+                  <p className={styles.markTagline}>{settings.brandTagline}</p>
+                  <p className={styles.markSince}>Agente desde 2018</p>
+                </div>
+              )}
+            </figure>
+          </Tilt>
         </Reveal>
 
-        <div>
+        <div className={styles.content}>
           <Reveal>
             <SectionEyebrow index="04" label="Trayectoria" />
             <h2 id="sobre-titulo" className={styles.title}>
@@ -71,26 +84,20 @@ export function About({ settings }: AboutProps) {
             </h2>
           </Reveal>
 
-          <Reveal delay={0.08}>
-            <p className={styles.intro}>{settings.aboutIntro}</p>
-          </Reveal>
+          <Typed text={settings.aboutIntro} className={styles.intro} speed={34} />
 
-          <Reveal delay={0.14}>
-            <div className={styles.body}>
-              {paragraphs.map((paragraph) => (
-                <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-              ))}
-            </div>
-          </Reveal>
+          <div className={styles.body}>
+            {paragraphs.map((paragraph) => (
+              <Typed key={paragraph.slice(0, 48)} text={paragraph} speed={22} />
+            ))}
+          </div>
+        </div>
 
-          <Reveal delay={0.18}>
-            <blockquote className={styles.quote}>
-              <p className={styles.quoteText}>«{settings.aboutQuote}»</p>
-              <footer className={styles.quoteAttribution}>
-                {settings.brandName} — {settings.brandRole}
-              </footer>
-            </blockquote>
-          </Reveal>
+        <div className={styles.quoteSlot}>
+          <PullQuote
+            text={settings.aboutQuote}
+            attribution={`${settings.brandName} — ${settings.brandRole}`}
+          />
         </div>
       </div>
     </section>

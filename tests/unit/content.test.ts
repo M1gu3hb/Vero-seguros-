@@ -38,7 +38,7 @@ describe('contenido inicial', () => {
     expect(new Set(slugs).size).toBe(slugs.length)
   })
 
-  it('carga las diez aseguradoras mencionadas y ninguna otra', () => {
+  it('carga las aseguradoras confirmadas y ninguna otra', () => {
     expect(defaultInsurers.map((insurer) => insurer.name)).toEqual([
       'Zurich',
       'GNP',
@@ -50,21 +50,45 @@ describe('contenido inicial', () => {
       'Afirme',
       'Mutus',
       'VRIM',
+      'Plan Seguro',
     ])
   })
 
   it('las aseguradoras traen su logotipo oficial y un texto alternativo', () => {
     const conLogo = defaultInsurers.filter((insurer) => insurer.imageUrl)
-    expect(conLogo.length).toBe(9)
+    expect(conLogo.length).toBe(defaultInsurers.length - 1)
 
     for (const insurer of conLogo) {
-      expect(insurer.imageUrl).toMatch(/^\/brand\/aseguradoras\/[a-z]+\.svg$/)
+      expect(insurer.imageUrl).toMatch(/^\/brand\/aseguradoras\/[a-z-]+\.svg$/)
       expect(insurer.imageAlt).toBeTruthy()
     }
 
     // Mutus se muestra con su nombre en tipografía
     const mutus = defaultInsurers.find((insurer) => insurer.name === 'Mutus')
     expect(mutus?.imageUrl).toBeNull()
+  })
+
+  it('cada ramo explica qué cubre, sin prometer coberturas', () => {
+    for (const service of defaultServices) {
+      expect(service.detail, service.name).toBeTruthy()
+      expect(service.detail!.length).toBeGreaterThanOrEqual(40)
+      expect(service.detail!.length).toBeLessThanOrEqual(900)
+      expect(service.detail!.toLowerCase()).not.toMatch(
+        /garantiz|te aseguramos|siempre cubre|sin excepci/,
+      )
+    }
+  })
+
+  it('los plazos y las modalidades de pago vienen cargados', () => {
+    expect(defaultSettings.promosInstallments).toEqual(['3 meses', '6 meses', '12 meses'])
+    expect(defaultSettings.promosFrequencies).toEqual([
+      'Mensual',
+      'Trimestral',
+      'Semestral',
+      'Anual',
+    ])
+    expect(defaultSettings.promosInstallmentsLabel).toBeTruthy()
+    expect(defaultSettings.promosFrequenciesLabel).toBeTruthy()
   })
 
   it('no incluye «etcétera» como si fuera una aseguradora', () => {

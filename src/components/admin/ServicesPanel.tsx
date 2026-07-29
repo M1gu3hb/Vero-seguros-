@@ -107,6 +107,16 @@ function ServiceForm({
           required
         />
 
+        <TextAreaField
+          name="detail"
+          label="Qué cubre"
+          hint="Se despliega en la página al pulsar el seguro. Explica en general qué contempla el ramo y deja claro que las condiciones dependen de la aseguradora y de la póliza. Si lo dejas en blanco, el seguro no se podrá abrir."
+          defaultValue={service?.detail ?? ''}
+          error={state.errors?.detail}
+          maxLength={900}
+          tall
+        />
+
         <div className={styles.fieldRow}>
           <SelectField
             name="icon"

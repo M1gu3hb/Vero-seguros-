@@ -1,5 +1,6 @@
 import { DrawnPath } from '@/components/motion/DrawnPath'
 import { Reveal } from '@/components/motion/Reveal'
+import { StepArrow } from '@/components/motion/StepArrow'
 import { SectionEyebrow } from '@/components/site/SectionHeading'
 import { processSection } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
@@ -50,6 +51,8 @@ export function Process() {
                 className={styles.step}
                 delay={Math.min(index * 0.12, 0.3)}
               >
+                {index > 0 ? <StepArrow order={index - 1} className={styles.arrow} /> : null}
+
                 <span className={styles.marker} aria-hidden="true">
                   {index + 1}
                 </span>

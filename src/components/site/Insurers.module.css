@@ -3,6 +3,9 @@
   background-image: var(--grain);
   background-blend-mode: multiply;
   overflow: hidden;
+  /* Formas de pago viene justo detrás; con el aire completo de sección
+     quedaba un vacío tan largo que la página parecía terminar aquí. */
+  padding-block-end: clamp(2.25rem, 1.5rem + 3.5vw, 4.5rem);
 }
 
 .head {

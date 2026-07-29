@@ -1,6 +1,7 @@
 import { Monogram } from '@/components/brand/Monogram'
 import { Trajectory } from '@/components/brand/Trajectory'
 import { Reveal } from '@/components/motion/Reveal'
+import { UnderlinedTitle } from '@/components/motion/UnderlinedTitle'
 import { SectionEyebrow } from '@/components/site/SectionHeading'
 import { humanSection } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
@@ -20,12 +21,19 @@ export function HumanSense() {
       </div>
 
       <div className={`container ruled ruled--on-navy ${styles.grid}`}>
-        <Reveal>
-          <SectionEyebrow index="02" label={humanSection.eyebrow} onNavy />
-          <h2 id="humano-titulo" className={styles.title}>
-            {humanSection.title}
-          </h2>
-        </Reveal>
+        <div>
+          <Reveal>
+            <SectionEyebrow index="02" label={humanSection.eyebrow} onNavy />
+          </Reveal>
+          <UnderlinedTitle
+            id="humano-titulo"
+            text={humanSection.title}
+            className={styles.title}
+            maskClassName={styles.titleMask}
+            wordClassName={styles.titleWord}
+            ruleClassName={styles.titleRule}
+          />
+        </div>
 
         <ul className={styles.list}>
           {humanSection.pillars.map((pillar, index) => (

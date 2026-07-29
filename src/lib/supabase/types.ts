@@ -11,6 +11,8 @@ export type ServiceRow = {
   name: string
   slug: string
   description: string
+  /** Texto largo que se despliega al pulsar el ramo. Opcional. */
+  detail: string | null
   icon: string
   sort_order: number
   is_visible: boolean
@@ -59,6 +61,10 @@ export type SiteSettingsRow = {
   promos_description: string
   promos_note: string
   promos_visible: boolean
+  promos_installments_label: string
+  promos_installments: string[]
+  promos_frequencies_label: string
+  promos_frequencies: string[]
 
   updated_at: string
 }
@@ -82,7 +88,10 @@ export type Database = {
       }
       services: {
         Row: ServiceRow
-        Insert: Insert<ServiceRow, 'id' | 'created_at' | 'updated_at' | 'icon' | 'sort_order' | 'is_visible'>
+        Insert: Insert<
+          ServiceRow,
+          'id' | 'created_at' | 'updated_at' | 'detail' | 'icon' | 'sort_order' | 'is_visible'
+        >
         Update: Partial<ServiceRow>
         Relationships: []
       }

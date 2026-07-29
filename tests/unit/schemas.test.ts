@@ -180,15 +180,49 @@ describe('insurerSchema', () => {
 })
 
 describe('promosSchema', () => {
+  const base = {
+    promosTitle: defaultSettings.promosTitle,
+    promosDescription: defaultSettings.promosDescription,
+    promosNote: defaultSettings.promosNote,
+    promosVisible: true,
+    promosInstallmentsLabel: defaultSettings.promosInstallmentsLabel,
+    promosInstallments: defaultSettings.promosInstallments,
+    promosFrequenciesLabel: defaultSettings.promosFrequenciesLabel,
+    promosFrequencies: defaultSettings.promosFrequencies,
+  }
+
   it('acepta el contenido inicial', () => {
+    expect(promosSchema.safeParse(base).success).toBe(true)
+  })
+
+  it('descarta los renglones vacíos de las listas', () => {
+    const result = promosSchema.safeParse({
+      ...base,
+      promosInstallments: ['3 meses', '   ', '', '12 meses'],
+    })
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.promosInstallments).toEqual(['3 meses', '12 meses'])
+  })
+
+  it('admite una lista vacía: así se oculta ese bloque', () => {
+    const result = promosSchema.safeParse({ ...base, promosFrequencies: [] })
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.promosFrequencies).toEqual([])
+  })
+
+  it('rechaza un elemento demasiado largo', () => {
+    expect(
+      promosSchema.safeParse({ ...base, promosInstallments: ['x'.repeat(41)] }).success,
+    ).toBe(false)
+  })
+
+  it('rechaza más de doce elementos', () => {
     expect(
       promosSchema.safeParse({
-        promosTitle: defaultSettings.promosTitle,
-        promosDescription: defaultSettings.promosDescription,
-        promosNote: defaultSettings.promosNote,
-        promosVisible: true,
+        ...base,
+        promosInstallments: Array.from({ length: 13 }, (_, i) => `${i + 1} meses`),
       }).success,
-    ).toBe(true)
+    ).toBe(false)
   })
 })
 

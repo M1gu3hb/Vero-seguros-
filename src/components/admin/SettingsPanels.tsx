@@ -5,6 +5,7 @@ import { useActionState, useState } from 'react'
 import styles from '@/app/admin/admin.module.css'
 import { saveAbout, saveHero, saveIdentity, savePromos } from '@/actions/content'
 import { idleState } from '@/actions/types'
+import { ListField } from '@/components/admin/ListField'
 import { MediaField } from '@/components/admin/MediaField'
 import { TextAreaField, TextField } from '@/components/admin/fields'
 import { FormFoot, PanelHead, useDirty } from '@/components/admin/form'
@@ -282,6 +283,46 @@ export function PromosPanel({ settings }: PanelProps) {
           maxLength={700}
           required
         />
+
+        <div className={styles.fieldRow}>
+          <TextField
+            name="promosInstallmentsLabel"
+            label="Rótulo de los plazos"
+            defaultValue={settings.promosInstallmentsLabel}
+            error={state.errors?.promosInstallmentsLabel}
+            maxLength={90}
+            required
+          />
+          <TextField
+            name="promosFrequenciesLabel"
+            label="Rótulo de las modalidades"
+            defaultValue={settings.promosFrequenciesLabel}
+            error={state.errors?.promosFrequenciesLabel}
+            maxLength={90}
+            required
+          />
+        </div>
+
+        <div className={styles.fieldRow}>
+          <ListField
+            name="promosInstallments"
+            label="Plazos"
+            hint="Uno por renglón. Quitar uno no afecta a los demás; si dejas la lista vacía, ese bloque no aparece en la página."
+            values={settings.promosInstallments}
+            error={state.errors?.promosInstallments}
+            placeholder="3 meses"
+            onChanged={markDirty}
+          />
+          <ListField
+            name="promosFrequencies"
+            label="Modalidades"
+            hint="Con qué periodicidad se puede pagar."
+            values={settings.promosFrequencies}
+            error={state.errors?.promosFrequencies}
+            placeholder="Mensual"
+            onChanged={markDirty}
+          />
+        </div>
 
         <TextAreaField
           name="promosNote"

@@ -52,6 +52,41 @@ const optionalText = (max: number) =>
     .nullish()
     .transform((value) => (value ? value : null))
 
+/**
+ * Texto largo opcional: o está vacío, o cumple el mínimo.
+ *
+ * Se usa para el detalle de cada seguro, que puede no existir todavía pero,
+ * si existe, tiene que decir algo.
+ */
+const optionalMultiline = (min: number, max: number, label: string) =>
+  z
+    .string()
+    .nullish()
+    .transform((value) => (value ?? '').replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n').trim())
+    .refine(
+      (value) => value === '' || value.length >= min,
+      `${label}: escribe al menos ${min} caracteres o déjalo en blanco.`,
+    )
+    .refine((value) => value.length <= max, `${label}: máximo ${max} caracteres.`)
+    .transform((value) => (value === '' ? null : value))
+
+/**
+ * Lista editable de textos breves.
+ *
+ * Llega del formulario como un campo repetido: cada renglón es un elemento.
+ * Los vacíos se descartan, de modo que borrar el contenido de un renglón
+ * equivale a quitarlo.
+ */
+const shortList = (max: number, label: string) =>
+  z
+    .array(z.string())
+    .transform((values) => values.map((value) => value.trim()).filter(Boolean))
+    .refine(
+      (values) => values.every((value) => value.length <= 40),
+      `${label}: cada elemento admite hasta 40 caracteres.`,
+    )
+    .refine((values) => values.length <= max, `${label}: como máximo ${max} elementos.`)
+
 /* ── Identidad y contacto ───────────────────────────────────────────────── */
 
 export const identitySchema = z.object({
@@ -101,6 +136,10 @@ export const promosSchema = z.object({
   promosDescription: multiline(20, 700, 'Descripción'),
   promosNote: multiline(10, 400, 'Nota de condiciones'),
   promosVisible: z.boolean(),
+  promosInstallmentsLabel: trimmed(2, 90, 'Rótulo de los plazos'),
+  promosInstallments: shortList(12, 'Plazos'),
+  promosFrequenciesLabel: trimmed(2, 90, 'Rótulo de las modalidades'),
+  promosFrequencies: shortList(12, 'Modalidades'),
 })
 
 /* ── Servicios ──────────────────────────────────────────────────────────── */
@@ -120,6 +159,7 @@ export const serviceSchema = z.object({
   name: trimmed(2, 80, 'Nombre'),
   slug: slugSchema,
   description: multiline(10, 400, 'Descripción'),
+  detail: optionalMultiline(40, 900, 'Qué cubre'),
   icon: trimmed(1, 40, 'Icono'),
   isVisible: z.boolean(),
 })

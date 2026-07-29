@@ -1,6 +1,7 @@
 import { Monogram } from '@/components/brand/Monogram'
 import { Trajectory } from '@/components/brand/Trajectory'
 import { Reveal } from '@/components/motion/Reveal'
+import { MailLink } from '@/components/site/MailLink'
 import { SectionEyebrow } from '@/components/site/SectionHeading'
 import { closingSection, type SiteSettings } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
@@ -10,10 +11,11 @@ type ClosingProps = {
   settings: SiteSettings
   whatsappUrl: string | null
   mailtoUrl: string
+  webmailUrl: string
 }
 
 /** Cierre y contacto. Sin formulario y sin captura de datos personales. */
-export function Closing({ settings, whatsappUrl, mailtoUrl }: ClosingProps) {
+export function Closing({ settings, whatsappUrl, mailtoUrl, webmailUrl }: ClosingProps) {
   return (
     <section
       id={SECTIONS.contact}
@@ -49,9 +51,13 @@ export function Closing({ settings, whatsappUrl, mailtoUrl }: ClosingProps) {
                 </span>
               </a>
             ) : null}
-            <a className="btn btn--ghost-on-navy" href={mailtoUrl}>
+            <MailLink
+              className="btn btn--ghost-on-navy"
+              href={mailtoUrl}
+              webmailHref={webmailUrl}
+            >
               Quiero recibir orientación
-            </a>
+            </MailLink>
           </div>
 
           <dl className={styles.contactList}>

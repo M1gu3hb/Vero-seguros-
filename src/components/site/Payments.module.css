@@ -1,4 +1,14 @@
+/*
+ * Formas de pago.
+ *
+ * Llega inmediatamente después de la cinta de aseguradoras: con el espaciado
+ * normal de sección quedaban casi trescientos píxeles en blanco entre una y
+ * otra y la página parecía terminar ahí. Aquí se recorta el aire de arriba y
+ * se sustituye por un filete que enlaza las dos secciones.
+ */
 .section {
+  position: relative;
+  padding-block-start: clamp(2rem, 1.25rem + 3.5vw, 4rem);
   background-color: var(--paper);
   background-image: var(--grain);
   background-blend-mode: multiply;
@@ -7,7 +17,7 @@
 .panel {
   position: relative;
   display: grid;
-  gap: clamp(1.75rem, 4vw, 3rem);
+  gap: clamp(1.75rem, 3.5vw, 2.75rem);
   padding: clamp(1.9rem, 5vw, 3.75rem);
   background: var(--cream);
   border: 1px solid var(--rule);
@@ -40,15 +50,16 @@
   max-width: 44ch;
 }
 
-.terms {
+/* ── Plazos y modalidades ───────────────────────────────────────────────── */
+.groups {
   display: grid;
-  gap: 1.5rem;
-  position: relative;
+  gap: clamp(1.75rem, 3.5vw, 2.5rem);
+  align-content: start;
 }
 
 .termGroup {
   display: grid;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .termLabel {
@@ -62,6 +73,15 @@
   color: var(--gold-deep);
 }
 
+.termNumber {
+  font-family: var(--font-serif);
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
 .termLabel::after {
   content: '';
   flex: 1;
@@ -70,31 +90,34 @@
   opacity: 0.3;
 }
 
-.chips {
+/*
+ * Sin cápsulas y sin separadores entre unos y otros: cada plazo lleva su
+ * propio filete dorado encima, como el encabezado de una columna. Así el
+ * bloque no parece un formulario y, sobre todo, se recompone bien al agregar
+ * o quitar plazos: nunca queda un separador suelto al principio de un
+ * renglón, que es lo que pasa cuando la separación va entre elementos.
+ */
+.terms {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 1.1rem clamp(1.25rem, 2.4vw, 2rem);
 }
 
-.chip {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--rule-strong);
-  border-radius: 999px;
-  background: var(--paper);
-  font-size: 0.8125rem;
-  font-weight: 500;
+.term {
+  display: grid;
+  gap: 0.45rem;
+  font-family: var(--font-serif);
+  font-size: var(--step-1);
+  line-height: 1.2;
   color: var(--navy);
   white-space: nowrap;
-  transition:
-    border-color var(--dur) var(--ease-soft),
-    transform var(--dur) var(--ease),
-    box-shadow var(--dur) var(--ease-soft);
 }
 
-.chip:hover {
-  border-color: var(--gold);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -12px rgba(7, 20, 38, 0.45);
+.term::before {
+  content: '';
+  width: 1.35rem;
+  height: 1px;
+  background: var(--gold);
 }
 
 .note {
@@ -111,6 +134,12 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
     gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  /* Los dos grupos comparten columna y se separan con un filete vertical */
+  .groups {
+    padding-inline-start: clamp(2rem, 4vw, 3rem);
+    border-inline-start: 1px solid var(--rule);
   }
 
   .note {

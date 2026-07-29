@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import { About } from '@/components/site/About'
@@ -30,6 +30,33 @@ describe('<Services />', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
+  it('cada ramo se puede abrir para leer qué cubre', async () => {
+    render(<Services services={defaultServices} />)
+
+    const boton = screen.getByRole('button', { name: 'Seguro de Auto' })
+    expect(boton).toHaveAttribute('aria-expanded', 'false')
+    expect(boton).toHaveAttribute('aria-controls')
+
+    fireEvent.click(boton)
+    expect(boton).toHaveAttribute('aria-expanded', 'true')
+
+    const auto = defaultServices.find((service) => service.slug === 'auto')
+    const panel = await screen.findByText(auto!.detail!)
+    expect(panel).toBeInTheDocument()
+    expect(panel.closest(`#${CSS.escape(boton.getAttribute('aria-controls')!)}`)).not.toBeNull()
+
+    fireEvent.click(boton)
+    expect(boton).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('un ramo sin texto de cobertura no se convierte en botón', () => {
+    const [first] = defaultServices
+    if (!first) throw new Error('falta el contenido inicial')
+    render(<Services services={[{ ...first, detail: null }]} />)
+    expect(screen.queryByRole('button', { name: first.name })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: first.name })).toBeInTheDocument()
+  })
+
   it('funciona con un único servicio', () => {
     const [first] = defaultServices
     render(<Services services={first ? [first] : []} />)
@@ -47,6 +74,18 @@ describe('<ServiceIcon />', () => {
   })
 })
 
+/**
+ * La biografía se escribe palabra por palabra, así que cada párrafo queda
+ * repartido en varios `span`. Lo que interesa comprobar sigue siendo lo mismo:
+ * que el texto completo esté en el documento y separado en los párrafos
+ * correctos.
+ */
+function parrafosDe(section: HTMLElement) {
+  return Array.from(section.querySelectorAll('p')).map((p) =>
+    (p.textContent ?? '').replace(/\s+/g, ' ').trim(),
+  )
+}
+
 describe('<About />', () => {
   it('separa la biografía en párrafos con saltos simples', () => {
     render(
@@ -54,10 +93,10 @@ describe('<About />', () => {
         settings={{ ...defaultSettings, aboutBody: 'Uno del texto.\n\nDos del texto.\n\nTres.' }}
       />,
     )
-    const section = screen.getByRole('region', { name: /Sobre Verónica/ })
-    expect(within(section).getByText('Uno del texto.')).toBeInTheDocument()
-    expect(within(section).getByText('Dos del texto.')).toBeInTheDocument()
-    expect(within(section).getByText('Tres.')).toBeInTheDocument()
+    const parrafos = parrafosDe(screen.getByRole('region', { name: /Sobre Verónica/ }))
+    expect(parrafos).toContain('Uno del texto.')
+    expect(parrafos).toContain('Dos del texto.')
+    expect(parrafos).toContain('Tres.')
   })
 
   it('también los separa si el texto llega con saltos CRLF del navegador', () => {
@@ -66,9 +105,16 @@ describe('<About />', () => {
         settings={{ ...defaultSettings, aboutBody: 'Uno del texto.\r\n\r\nDos del texto.' }}
       />,
     )
+    const parrafos = parrafosDe(screen.getByRole('region', { name: /Sobre Verónica/ }))
+    expect(parrafos).toContain('Uno del texto.')
+    expect(parrafos).toContain('Dos del texto.')
+  })
+
+  it('la cita se anuncia completa aunque se componga palabra por palabra', () => {
+    render(<About settings={defaultSettings} />)
     const section = screen.getByRole('region', { name: /Sobre Verónica/ })
-    expect(within(section).getByText('Uno del texto.')).toBeInTheDocument()
-    expect(within(section).getByText('Dos del texto.')).toBeInTheDocument()
+    const cita = section.querySelector('blockquote')
+    expect(cita?.textContent).toContain(defaultSettings.aboutQuote)
   })
 })
 
@@ -83,6 +129,42 @@ describe('<Payments />', () => {
       <Payments settings={{ ...defaultSettings, promosVisible: false }} />,
     )
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it('lista los plazos y las modalidades que estén cargados', () => {
+    render(<Payments settings={defaultSettings} />)
+    for (const term of [
+      ...defaultSettings.promosInstallments,
+      ...defaultSettings.promosFrequencies,
+    ]) {
+      expect(screen.getByText(term)).toBeInTheDocument()
+    }
+    expect(screen.getByRole('heading', { name: /Meses sin intereses/i })).toBeInTheDocument()
+  })
+
+  it('se acomoda con cualquier número de plazos', () => {
+    render(
+      <Payments
+        settings={{ ...defaultSettings, promosInstallments: ['6 meses'], promosFrequencies: [] }}
+      />,
+    )
+    expect(screen.getByText('6 meses')).toBeInTheDocument()
+    // El bloque sin elementos no deja un rótulo huérfano
+    expect(
+      screen.queryByRole('heading', { name: defaultSettings.promosFrequenciesLabel }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('no muestra el bloque de plazos si las dos listas están vacías', () => {
+    render(
+      <Payments
+        settings={{ ...defaultSettings, promosInstallments: [], promosFrequencies: [] }}
+      />,
+    )
+    expect(
+      screen.queryByRole('heading', { name: defaultSettings.promosInstallmentsLabel }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText(defaultSettings.promosNote)).toBeInTheDocument()
   })
 })
 

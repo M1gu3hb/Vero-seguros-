@@ -9,13 +9,54 @@ type PaymentsProps = {
   settings: SiteSettings
 }
 
-/* Modalidades tal como las describió Verónica. No se presentan como
-   permanentes ni garantizadas: la nota de condiciones lo aclara. */
-const INTEREST_FREE = ['3 meses', '6 meses', '12 meses']
-const FREQUENCIES = ['Mensual', 'Trimestral', 'Semestral', 'Anual']
+type TermGroupProps = {
+  label: string
+  terms: string[]
+  /** Numeración interna, para el filete que precede al rótulo. */
+  order: number
+}
 
+/**
+ * Un grupo de plazos.
+ *
+ * Los términos no van encerrados en cápsulas: se leen como una secuencia
+ * tipográfica separada por rombos dorados, igual que los datos del reverso de
+ * la tarjeta. Así el bloque no parece un formulario, y da lo mismo que haya
+ * dos elementos o diez: la fila se acomoda sola.
+ */
+function TermGroup({ label, terms, order }: TermGroupProps) {
+  if (terms.length === 0) return null
+
+  return (
+    <div className={styles.termGroup}>
+      <h3 className={styles.termLabel}>
+        <span className={styles.termNumber} aria-hidden="true">
+          {String(order).padStart(2, '0')}
+        </span>
+        {label}
+      </h3>
+      <ul className={styles.terms}>
+        {terms.map((term) => (
+          <li key={term} className={styles.term}>
+            {term}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/**
+ * Formas de pago.
+ *
+ * Va pegada a las aseguradoras a propósito: antes quedaba un vacío tan largo
+ * entre una sección y otra que parecía el final de la página.
+ */
 export function Payments({ settings }: PaymentsProps) {
   if (!settings.promosVisible) return null
+
+  const hasTerms =
+    settings.promosInstallments.length > 0 || settings.promosFrequencies.length > 0
 
   return (
     <section
@@ -29,7 +70,7 @@ export function Payments({ settings }: PaymentsProps) {
             <CropMarks />
             <Trajectory className={styles.curve} />
 
-            <div>
+            <div className={styles.intro}>
               <SectionEyebrow index="06" label="Formas de pago" />
               <h2 id="pagos-titulo" className={styles.title}>
                 {settings.promosTitle}
@@ -37,29 +78,20 @@ export function Payments({ settings }: PaymentsProps) {
               <p className={styles.description}>{settings.promosDescription}</p>
             </div>
 
-            <div className={styles.terms}>
-              <div className={styles.termGroup}>
-                <h3 className={styles.termLabel}>Meses sin intereses en algunas aseguradoras</h3>
-                <ul className={styles.chips}>
-                  {INTEREST_FREE.map((term) => (
-                    <li key={term} className={styles.chip}>
-                      {term}
-                    </li>
-                  ))}
-                </ul>
+            {hasTerms ? (
+              <div className={styles.groups}>
+                <TermGroup
+                  order={1}
+                  label={settings.promosInstallmentsLabel}
+                  terms={settings.promosInstallments}
+                />
+                <TermGroup
+                  order={2}
+                  label={settings.promosFrequenciesLabel}
+                  terms={settings.promosFrequencies}
+                />
               </div>
-
-              <div className={styles.termGroup}>
-                <h3 className={styles.termLabel}>Modalidades de pago</h3>
-                <ul className={styles.chips}>
-                  {FREQUENCIES.map((term) => (
-                    <li key={term} className={styles.chip}>
-                      {term}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            ) : null}
 
             <p className={styles.note}>{settings.promosNote}</p>
           </div>
