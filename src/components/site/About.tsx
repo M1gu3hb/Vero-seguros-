@@ -84,13 +84,19 @@ export function About({ settings }: AboutProps) {
             </h2>
           </Reveal>
 
-          <Typed text={settings.aboutIntro} className={styles.intro} speed={34} />
-
-          <div className={styles.body}>
-            {paragraphs.map((paragraph) => (
-              <Typed key={paragraph.slice(0, 48)} text={paragraph} speed={22} />
-            ))}
-          </div>
+          {/*
+            La introducción y la biografía se escriben de corrido, como un solo
+            texto: empieza en la primera palabra y no para hasta la última.
+          */}
+          <Typed
+            speed={48}
+            bodyFrom={1}
+            bodyClassName={styles.body}
+            blocks={[
+              { text: settings.aboutIntro, className: styles.intro },
+              ...paragraphs.map((paragraph) => ({ text: paragraph })),
+            ]}
+          />
         </div>
 
         <div className={styles.quoteSlot}>

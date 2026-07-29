@@ -256,7 +256,9 @@ test.describe('movimiento reducido', () => {
       .evaluateAll((nodes) => nodes.filter((n) => getComputedStyle(n).transform !== 'none').length)
     expect(adornos).toBe(0)
   })
+})
 
+test.describe('seguros desplegables', () => {
   test('cada seguro se abre y explica qué cubre', async ({ page }) => {
     await page.goto('/')
     await scrollThrough(page)
@@ -293,6 +295,94 @@ test.describe('movimiento reducido', () => {
 
     await page.keyboard.press('Enter')
     await expect(boton).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('sólo hay un seguro abierto a la vez', async ({ page }) => {
+    await page.goto('/')
+    await scrollThrough(page)
+
+    const disparadores = page.locator('#seguros h3 button')
+    if ((await disparadores.count()) < 2) test.skip(true, 'hace falta más de un ramo')
+
+    const primero = disparadores.first()
+    const segundo = disparadores.nth(1)
+
+    await primero.click()
+    await expect(primero).toHaveAttribute('aria-expanded', 'true')
+
+    await segundo.click()
+    await expect(segundo).toHaveAttribute('aria-expanded', 'true')
+    await expect(primero).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('se abre pulsando en cualquier parte del ramo, no sólo en el nombre', async ({ page }) => {
+    await page.goto('/')
+    await scrollThrough(page)
+
+    const fila = page.locator('#seguros ul').last().locator('> li').first()
+    const boton = fila.locator('h3 button')
+    await fila.scrollIntoViewIfNeeded()
+    await expect(boton).toHaveAttribute('aria-expanded', 'false')
+
+    // La descripción queda cubierta por la zona sensible del botón.
+    // Se pasa el cursor primero: el renglón se desplaza un poco al recibirlo,
+    // y hay que medir con esa posición ya asentada.
+    const descripcion = fila.locator('p').first()
+    await descripcion.hover({ force: true })
+    await page.waitForTimeout(500)
+
+    const caja = await descripcion.boundingBox()
+    if (!caja) throw new Error('no se pudo medir la descripción')
+    await page.mouse.click(caja.x + caja.width / 2, caja.y + caja.height / 2)
+    await expect(boton).toHaveAttribute('aria-expanded', 'true')
+
+    // Y pulsar dentro del texto ya desplegado no lo cierra
+    const panelId = await boton.getAttribute('aria-controls')
+    // El panel se abre con una animación de altura: hay que medirlo ya quieto
+    await page.waitForTimeout(800)
+    const dentro = await page.locator(`#${panelId} p`).boundingBox()
+    if (!dentro) throw new Error('no se pudo medir el texto desplegado')
+    await page.mouse.click(dentro.x + 30, dentro.y + dentro.height / 2)
+    await expect(boton).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  test('la línea de fondo no mueve la página al salir de pantalla', async ({ page }) => {
+    await page.goto('/')
+
+    const arranque = await page.evaluate(() => {
+      const seccion = document.getElementById('sentido-humano')
+      return seccion ? seccion.getBoundingClientRect().top + window.scrollY : 0
+    })
+    await page.evaluate((y) => window.scrollTo(0, Math.max(0, y - 1300)), arranque)
+    await page.waitForTimeout(600)
+
+    await page.evaluate(() => {
+      const saltos: number[] = []
+      let previo = window.scrollY
+      const tick = () => {
+        if (Math.abs(window.scrollY - previo) > 90) saltos.push(Math.round(window.scrollY - previo))
+        previo = window.scrollY
+        requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+      ;(window as unknown as { __saltos: number[] }).__saltos = saltos
+    })
+
+    for (let i = 0; i < 34; i += 1) {
+      await page.mouse.wheel(0, 60)
+      await page.waitForTimeout(55)
+    }
+    await page.waitForTimeout(700)
+
+    /*
+     * El adorno de fondo llegó a desmontarse al perderse de vista, y al quitar
+     * ese nodo el navegador recolocaba el desplazamiento de golpe: la página
+     * se saltaba entera la sección siguiente.
+     */
+    const saltos = await page.evaluate(
+      () => (window as unknown as { __saltos: number[] }).__saltos,
+    )
+    expect(saltos).toEqual([])
   })
 
   test('el botón de correo lleva a escribir cuando no hay programa de correo', async ({ page }) => {
@@ -336,7 +426,10 @@ test.describe('movimiento reducido', () => {
     for (const plazo of plazos) expect(plazo.trim().length).toBeGreaterThan(0)
   })
 
-  test('la cinta de aseguradoras se sustituye por una lista estática', async ({ page }) => {
+})
+
+test.describe('cinta de aseguradoras', () => {
+  test('con movimiento reducido se sustituye por una lista estática', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto('/')
     await page.waitForTimeout(400)
