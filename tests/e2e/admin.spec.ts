@@ -268,7 +268,14 @@ test.describe('sesión de la administradora', () => {
     await page.waitForURL('**/admin')
   })
 
-  test('puede editar un texto y el cambio persiste y se publica', async ({ page }) => {
+  /*
+   * Ésta es la única prueba que **guarda** de verdad, así que se ejecuta en un
+   * solo tamaño de pantalla: los tres proyectos corren en paralelo contra la
+   * misma base de datos y se pisarían el mismo texto.
+   */
+  test('puede editar un texto y el cambio persiste y se publica', async ({ page }, info) => {
+    test.skip(info.project.name !== 'escritorio', 'guarda en la base: se corre una sola vez')
+
     const campo = page.locator('input[name="campo-identidad.cobertura"]')
     const value = `Atención a nivel nacional · ${Date.now()}`
 
@@ -298,7 +305,9 @@ test.describe('sesión de la administradora', () => {
    */
   test('lo que se escribe sobre el diseño llega al campo de arriba', async ({ page }) => {
     await page.getByRole('button', { name: 'Sentido humano', exact: true }).click()
-    await page.getByRole('group').filter({ hasText: 'Vista previa' }).first().click()
+
+    // La vista previa vive dentro de un desplegable: hay que abrirlo.
+    await page.getByText('Vista previa · edita el texto sobre el diseño').click()
 
     const sobreElDiseno = page.locator('[data-txt="humano.etiqueta"]')
     await expect(sobreElDiseno).toBeVisible()
