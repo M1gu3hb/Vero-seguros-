@@ -38,17 +38,22 @@ personales y sin funciones que el proyecto no necesita.
 | --- | --- |
 | Encabezado | Monograma VM, nombre, navegación por anclas y botón de contacto |
 | Inicio | Titular editorial, frase de marca, botones de WhatsApp y correo, placa de firma |
-| Seguros | Los ramos disponibles, con dos destacados y el resto como índice editorial |
+| Seguros | Los ramos disponibles, con dos destacados y el resto como índice editorial; cada uno se abre para leer qué cubre |
 | Sentido humano | Los cinco puntos que distinguen su forma de acompañar |
 | Proceso | Los tres pasos del acompañamiento sobre la curva de la marca |
 | Sobre Verónica | Biografía, cita destacada y fotografía opcional |
-| Aseguradoras | Nombres en tipografía, con nota sobre disponibilidad de productos |
-| Formas de pago | Modalidades y meses sin intereses, con nota de condiciones |
+| Aseguradoras | Logotipos oficiales en una cinta, con nota sobre disponibilidad de productos |
+| Formas de pago | Plazos y modalidades, editables uno a uno, con nota de condiciones |
 | Cierre y contacto | Llamada final, correo visible y cobertura nacional |
 | Pie | Identidad, correo, año dinámico y nota prudente |
 
 El número de WhatsApp **nunca aparece escrito**: sólo se usa para construir el
 enlace `wa.me` con el mensaje prellenado.
+
+Los botones de correo abren `mailto:` y, si el navegador no tiene ningún
+programa de correo asociado —el caso más común en una computadora de
+escritorio, donde el enlace no produce ninguna reacción visible—, llevan a la
+ventana de redacción del navegador con la dirección de Verónica ya puesta.
 
 ### Administrador (`/admin`)
 
@@ -59,12 +64,14 @@ Una sola administradora puede editar:
 - **Inicio** — etiqueta, título, descripción, textos de los botones y fotografía
   opcional.
 - **Seguros** — crear, editar, reordenar, mostrar/ocultar y eliminar (con
-  confirmación).
+  confirmación), incluido el texto de «qué cubre» que se despliega al pulsar el
+  ramo en la página.
 - **Sobre Verónica** — título, introducción, biografía, cita e imagen opcional.
 - **Aseguradoras** — crear, editar, reordenar, mostrar/ocultar, eliminar y
   logotipo opcional.
-- **Promociones y pagos** — título, descripción, nota de condiciones y
-  visibilidad de la sección.
+- **Promociones y pagos** — título, descripción, nota de condiciones,
+  visibilidad de la sección y las dos listas de plazos y modalidades, que se
+  agregan, se quitan y se reordenan una a una sin tocar las demás.
 - **Tu cuenta** — cambio de contraseña.
 
 No hay CRM, prospectos, cotizador, blog, agenda, pagos ni constructor de

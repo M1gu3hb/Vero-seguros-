@@ -57,6 +57,10 @@ const text = (formData: FormData, key: string) => {
 
 const bool = (formData: FormData, key: string) => formData.get(key) === 'on' || formData.get(key) === 'true'
 
+/** Campo repetido: todos los valores con ese nombre, en orden. */
+const list = (formData: FormData, key: string) =>
+  formData.getAll(key).filter((value): value is string => typeof value === 'string')
+
 /* ── Ajustes del sitio ──────────────────────────────────────────────────── */
 
 async function updateSettings(
@@ -171,6 +175,10 @@ export async function savePromos(_prev: ActionState, formData: FormData): Promis
     promosDescription: text(formData, 'promosDescription'),
     promosNote: text(formData, 'promosNote'),
     promosVisible: bool(formData, 'promosVisible'),
+    promosInstallmentsLabel: text(formData, 'promosInstallmentsLabel'),
+    promosInstallments: list(formData, 'promosInstallments'),
+    promosFrequenciesLabel: text(formData, 'promosFrequenciesLabel'),
+    promosFrequencies: list(formData, 'promosFrequencies'),
   })
 
   if (!parsed.success) {
@@ -183,6 +191,10 @@ export async function savePromos(_prev: ActionState, formData: FormData): Promis
       promos_description: parsed.data.promosDescription,
       promos_note: parsed.data.promosNote,
       promos_visible: parsed.data.promosVisible,
+      promos_installments_label: parsed.data.promosInstallmentsLabel,
+      promos_installments: parsed.data.promosInstallments,
+      promos_frequencies_label: parsed.data.promosFrequenciesLabel,
+      promos_frequencies: parsed.data.promosFrequencies,
     },
     'Promociones y formas de pago actualizadas.',
   )
@@ -200,6 +212,7 @@ export async function saveService(_prev: ActionState, formData: FormData): Promi
     name: text(formData, 'name'),
     slug: text(formData, 'slug'),
     description: text(formData, 'description'),
+    detail: text(formData, 'detail'),
     icon: text(formData, 'icon') || 'proteccion',
     isVisible: bool(formData, 'isVisible'),
   })
@@ -212,6 +225,7 @@ export async function saveService(_prev: ActionState, formData: FormData): Promi
     name: parsed.data.name,
     slug: parsed.data.slug,
     description: parsed.data.description,
+    detail: parsed.data.detail,
     icon: parsed.data.icon,
     is_visible: parsed.data.isVisible,
   }

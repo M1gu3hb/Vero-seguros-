@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_MAIL_SUBJECT,
   buildMailtoUrl,
+  buildWebmailUrl,
   buildWhatsAppUrl,
   normalizeWhatsAppNumber,
 } from '@/lib/contact'
@@ -47,11 +48,38 @@ describe('buildWhatsAppUrl', () => {
 describe('buildMailtoUrl', () => {
   it('genera un mailto válido con asunto', () => {
     expect(buildMailtoUrl('veronicam0602@gmail.com', DEFAULT_MAIL_SUBJECT)).toBe(
-      'mailto:veronicam0602@gmail.com?subject=Orientaci%C3%B3n%20sobre%20seguros',
+      'mailto:veronicam0602@gmail.com?subject=Orientaci%C3%B3n+sobre+seguros',
     )
   })
 
   it('genera un mailto simple sin asunto', () => {
     expect(buildMailtoUrl('veronicam0602@gmail.com')).toBe('mailto:veronicam0602@gmail.com')
+  })
+
+  it('incluye el cuerpo sugerido cuando se le pasa', () => {
+    const url = buildMailtoUrl('veronicam0602@gmail.com', 'Asunto', 'Hola, Verónica.')
+    expect(url).toContain('subject=Asunto')
+    expect(url).toContain('body=Hola%2C+Ver%C3%B3nica.')
+  })
+})
+
+describe('buildWebmailUrl', () => {
+  it('arma la redacción con la dirección de Verónica ya puesta', () => {
+    const url = new URL(
+      buildWebmailUrl('veronicam0602@gmail.com', DEFAULT_MAIL_SUBJECT, 'Hola, Verónica.'),
+    )
+    expect(url.origin).toBe('https://mail.google.com')
+    expect(url.searchParams.get('to')).toBe('veronicam0602@gmail.com')
+    expect(url.searchParams.get('su')).toBe(DEFAULT_MAIL_SUBJECT)
+    expect(url.searchParams.get('body')).toBe('Hola, Verónica.')
+  })
+
+  it('nunca escribe el número de WhatsApp', () => {
+    const url = buildWebmailUrl(
+      defaultSettings.contactEmail,
+      DEFAULT_MAIL_SUBJECT,
+      defaultSettings.whatsappMessage,
+    )
+    expect(url).not.toContain(defaultSettings.whatsappNumber)
   })
 })

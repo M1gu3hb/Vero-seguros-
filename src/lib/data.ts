@@ -47,6 +47,10 @@ export function mapSettings(row: SiteSettingsRow): SiteSettings {
     promosDescription: row.promos_description,
     promosNote: row.promos_note,
     promosVisible: row.promos_visible,
+    promosInstallmentsLabel: row.promos_installments_label,
+    promosInstallments: row.promos_installments ?? [],
+    promosFrequenciesLabel: row.promos_frequencies_label,
+    promosFrequencies: row.promos_frequencies ?? [],
   }
 }
 
@@ -56,6 +60,7 @@ export function mapService(row: ServiceRow): Service {
     name: row.name,
     slug: row.slug,
     description: row.description,
+    detail: row.detail,
     icon: row.icon,
     sortOrder: row.sort_order,
     isVisible: row.is_visible,
@@ -132,7 +137,14 @@ async function fetchPublicContent(): Promise<SiteContent> {
  * El CMS invalida esta etiqueta al guardar, así que los cambios se ven
  * inmediatamente después de publicar.
  */
-export const getPublicContent = unstable_cache(fetchPublicContent, ['public-site-content'], {
+/*
+ * La clave lleva versión a propósito. Lo que se guarda aquí es un objeto ya
+ * transformado, así que al agregar campos nuevos —los plazos de pago, el
+ * detalle de cada seguro— una entrada guardada por una compilación anterior
+ * seguiría teniendo la forma vieja y llegaría a la página sin esos campos.
+ * Subir el número descarta lo anterior de una vez.
+ */
+export const getPublicContent = unstable_cache(fetchPublicContent, ['public-site-content-2'], {
   tags: [SITE_CONTENT_TAG],
   revalidate: 300,
 })

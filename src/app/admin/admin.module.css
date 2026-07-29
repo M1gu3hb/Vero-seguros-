@@ -642,3 +642,50 @@
   padding-block-start: 1rem;
   border-block-start: 1px solid var(--rule);
 }
+
+/* ── Lista editable de textos breves ───────────────────────────────────── */
+/*
+ * Los plazos y las modalidades de pago. Cada renglón es un campo con el mismo
+ * nombre, de modo que el formulario los manda como una lista ordenada y quitar
+ * uno no obliga a reescribir los demás.
+ */
+.listRows {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.listRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.listRowActions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.listRowActions .iconButton {
+  width: 2rem;
+  height: 2.25rem;
+}
+
+.listFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-block-start: 0.65rem;
+}
+
+.listFoot .linkButton {
+  color: var(--navy);
+  min-height: 2rem;
+}
+
+.listFoot .linkButton:disabled {
+  opacity: 0.4;
+  text-decoration: none;
+  cursor: not-allowed;
+}

@@ -508,6 +508,34 @@ hr {
   color: var(--on-navy-muted);
 }
 
+/* ── Texto que se escribe solo ────────────────────────────────────────────── */
+/*
+ * El párrafo completo está siempre en el HTML; lo único que cambia es la
+ * opacidad de cada palabra. Así el texto se lee entero desde el primer momento
+ * para los buscadores y para un lector de pantalla, se ejecute o no la
+ * animación.
+ */
+[data-typed-word='oculta'] {
+  opacity: 0;
+}
+
+[data-typed-caret]::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  margin-inline-start: 0.14em;
+  vertical-align: -0.12em;
+  background: var(--gold);
+  animation: caret-blink 1.05s steps(1, end) infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 /* ── Movimiento reducido ──────────────────────────────────────────────────── */
 /*
  * El CSS es la fuente autoritativa de esta preferencia, así que aquí se fija
@@ -545,6 +573,21 @@ hr {
   [data-draw] {
     stroke-dasharray: none !important;
     stroke-dashoffset: 0 !important;
+  }
+
+  /* Filetes que se trazan bajo un título: dibujados de una vez */
+  [data-rule] {
+    transform: none !important;
+  }
+
+  /* Texto que se escribe solo: completo desde el principio y sin cursor */
+  [data-typed-word],
+  [data-typed-caret] {
+    opacity: 1 !important;
+  }
+
+  [data-typed-caret]::after {
+    display: none !important;
   }
 
   /* El indicador de avance depende del desplazamiento: se retira */

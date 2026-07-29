@@ -17,6 +17,12 @@
   position: relative;
 }
 
+/* Envoltura de la inclinación con el ratón: la perspectiva la fija el
+   componente, aquí sólo se le da un margen para que la sombra no se recorte. */
+.tilt {
+  will-change: transform;
+}
+
 .frame {
   position: relative;
   border: 1px solid var(--rule);
@@ -138,24 +144,35 @@
   margin-block-start: 1.1em;
 }
 
+/* ── La frase destacada ────────────────────────────────────────────────── */
+.quoteSlot {
+  margin-block-start: clamp(2.25rem, 4vw, 3rem);
+}
+
 .quote {
   position: relative;
-  margin-block-start: clamp(2.25rem, 4vw, 3rem);
   padding-inline-start: clamp(1.5rem, 3.5vw, 2.5rem);
-  border-inline-start: 1px solid var(--gold);
+}
+
+/* Filete dorado que baja por el costado al entrar */
+.quoteRule {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 1px;
+  background: var(--gold);
+  transform-origin: top;
 }
 
 /* Comilla de apertura en grande, como en una cita de revista */
-.quote::before {
-  content: '\201C';
+.quoteMark {
   position: absolute;
-  inset-block-start: -0.18em;
+  inset-block-start: -0.2em;
   inset-inline-start: clamp(0.6rem, 1.6vw, 1.1rem);
   font-family: var(--font-serif);
   font-size: clamp(3.5rem, 7vw, 5.5rem);
   line-height: 1;
   color: var(--gold);
-  opacity: 0.22;
   pointer-events: none;
 }
 
@@ -168,6 +185,19 @@
   max-width: 24ch;
 }
 
+/* Ventana que recorta cada palabra mientras sube */
+.quoteMask {
+  display: inline-block;
+  overflow: hidden;
+  padding-block-end: 0.14em;
+  margin-block-end: -0.14em;
+  vertical-align: bottom;
+}
+
+.quoteWord {
+  display: inline-block;
+}
+
 .quoteAttribution {
   margin-block-start: 0.9rem;
   font-size: 0.6875rem;
@@ -178,13 +208,37 @@
 }
 
 @media (min-width: 64rem) {
+  /*
+   * En pantallas anchas la fotografía dejaba un hueco largo debajo, porque la
+   * columna de texto es mucho más alta. La frase se coloca justo ahí: sigue
+   * después del texto en el HTML —el orden con el que se lee en un teléfono—
+   * pero la rejilla la lleva a la primera columna, bajo la foto.
+   */
   .grid {
     grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+    grid-template-rows: auto 1fr;
     gap: clamp(3rem, 6vw, 5rem);
+    align-content: start;
   }
 
   .aside {
-    position: sticky;
-    top: 7rem;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .content {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .quoteSlot {
+    grid-column: 1;
+    grid-row: 2;
+    margin-block-start: clamp(2rem, 3.5vw, 2.75rem);
+  }
+
+  .quoteText {
+    font-size: var(--step-2);
+    max-width: none;
   }
 }

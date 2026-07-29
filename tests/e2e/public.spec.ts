@@ -241,6 +241,97 @@ test.describe('movimiento reducido', () => {
 
     await expect(page.getByRole('heading', { name: 'Seguro de Vida' })).toBeVisible()
     await expect(page.getByRole('heading', { level: 2, name: /Sobre Verónica/ })).toBeVisible()
+
+    // Ni las palabras que normalmente se componen una a una, ni el texto que
+    // se escribe solo, ni los filetes que se trazan bajo un título
+    const escondidas = await page
+      .locator('[data-typed-word="oculta"], [data-rule]')
+      .evaluateAll((nodes) =>
+        nodes.filter((n) => {
+          const cs = getComputedStyle(n)
+          return Number.parseFloat(cs.opacity) < 0.99 || cs.transform !== 'none'
+        }).length,
+      )
+    expect(escondidas).toBe(0)
+  })
+
+  test('cada seguro se abre y explica qué cubre', async ({ page }) => {
+    await page.goto('/')
+    await scrollThrough(page)
+
+    const disparadores = page.locator('#seguros h3 button')
+    const total = await disparadores.count()
+    expect(total).toBeGreaterThan(0)
+
+    const primero = disparadores.first()
+    await expect(primero).toHaveAttribute('aria-expanded', 'false')
+
+    const panelId = await primero.getAttribute('aria-controls')
+    expect(panelId).toBeTruthy()
+
+    await primero.click()
+    await expect(primero).toHaveAttribute('aria-expanded', 'true')
+
+    const panel = page.locator(`#${panelId}`)
+    await expect(panel).toBeVisible()
+    expect((await panel.innerText()).trim().length).toBeGreaterThan(40)
+
+    await primero.click()
+    await expect(primero).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('los seguros se abren también con el teclado', async ({ page }) => {
+    await page.goto('/')
+    await scrollThrough(page)
+
+    const boton = page.locator('#seguros h3 button').first()
+    await boton.focus()
+    await page.keyboard.press('Enter')
+    await expect(boton).toHaveAttribute('aria-expanded', 'true')
+
+    await page.keyboard.press('Enter')
+    await expect(boton).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('el botón de correo lleva a escribir cuando no hay programa de correo', async ({ page }) => {
+    await page.route('https://mail.google.com/**', (route) =>
+      route.fulfill({ status: 200, contentType: 'text/html', body: '<title>redacción</title>' }),
+    )
+    await page.goto('/')
+
+    /*
+     * En un navegador sin gestor de correo asociado, pulsar un `mailto:` no
+     * provoca ninguna reacción. Se simula esa situación impidiendo la
+     * navegación del enlace: la página debe acabar llevando a la ventana de
+     * redacción con la dirección de Verónica ya puesta.
+     */
+    await page.evaluate(() => {
+      document
+        .querySelectorAll('a[href^="mailto:"]')
+        .forEach((a) => a.addEventListener('click', (event) => event.preventDefault()))
+    })
+
+    const correo = page.locator('main a[href^="mailto:"]').first()
+    const direccion = (await correo.getAttribute('href'))!.replace(/^mailto:/, '').split('?')[0]!
+
+    await correo.click()
+    await page.waitForURL(/mail\.google\.com/, { timeout: 15_000 })
+
+    const destino = new URL(page.url())
+    expect(destino.searchParams.get('to')).toBe(direccion)
+    expect(destino.searchParams.get('su')).toBeTruthy()
+  })
+
+  test('las formas de pago listan los plazos cargados', async ({ page }) => {
+    await page.goto('/')
+    await scrollThrough(page)
+
+    const pagos = page.locator('#pagos')
+    if ((await pagos.count()) === 0) test.skip(true, 'la sección está oculta desde el CMS')
+
+    const plazos = await pagos.locator('li').allInnerTexts()
+    expect(plazos.length).toBeGreaterThan(0)
+    for (const plazo of plazos) expect(plazo.trim().length).toBeGreaterThan(0)
   })
 
   test('la cinta de aseguradoras se sustituye por una lista estática', async ({ page }) => {
