@@ -1,0 +1,289 @@
+.header {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 100;
+  transition:
+    background-color var(--dur) var(--ease-soft),
+    box-shadow var(--dur) var(--ease-soft),
+    border-color var(--dur) var(--ease-soft);
+  border-block-end: 1px solid transparent;
+}
+
+.header[data-scrolled='true'] {
+  background: rgba(253, 250, 246, 0.88);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-block-end-color: var(--rule);
+}
+
+/* Cuando el menú móvil está abierto el encabezado no debe tapar el panel */
+.header[data-open='true'] {
+  background: transparent;
+  border-block-end-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 4.5rem;
+  transition: min-height var(--dur) var(--ease-soft);
+}
+
+.header[data-scrolled='true'] .inner {
+  min-height: 3.9rem;
+}
+
+/* ── Marca ─────────────────────────────────────────────────────────────── */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--navy);
+  text-decoration: none;
+  position: relative;
+  z-index: 2;
+}
+
+.brandMark {
+  height: 1.375rem;
+  transition: transform var(--dur) var(--ease);
+}
+
+.brand:hover .brandMark {
+  transform: translateY(-1px);
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brandName {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brandRole {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+/* ── Navegación de escritorio ──────────────────────────────────────────── */
+.nav {
+  display: none;
+}
+
+.navList {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.1rem, 2vw, 2rem);
+}
+
+.navLink {
+  position: relative;
+  display: inline-block;
+  padding-block: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-soft);
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur) var(--ease);
+}
+
+.navLink:hover {
+  color: var(--navy);
+}
+
+.navLink:hover::after,
+.navLink[data-active='true']::after {
+  transform: scaleX(1);
+}
+
+.navLink[data-active='true'] {
+  color: var(--navy);
+}
+
+.actions {
+  display: none;
+}
+
+/* ── Botón de menú (móvil) ─────────────────────────────────────────────── */
+.toggle {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 5px;
+  width: 3rem;
+  height: 3rem;
+  margin-inline-end: -0.75rem;
+  color: var(--navy);
+  position: relative;
+  z-index: 2;
+}
+
+.toggleBar {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: currentColor;
+  transition:
+    transform var(--dur) var(--ease),
+    opacity var(--dur-fast) var(--ease-soft),
+    width var(--dur) var(--ease);
+}
+
+.toggleBar:nth-child(2) {
+  width: 15px;
+}
+
+.toggle[aria-expanded='true'] .toggleBar:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+
+.toggle[aria-expanded='true'] .toggleBar:nth-child(2) {
+  opacity: 0;
+}
+
+.toggle[aria-expanded='true'] .toggleBar:nth-child(3) {
+  width: 22px;
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+/* ── Panel móvil ───────────────────────────────────────────────────────── */
+.panel {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 6rem var(--gutter) calc(2rem + env(safe-area-inset-bottom));
+  background: var(--cream);
+  overflow-y: auto;
+  animation: panel-in 380ms var(--ease) both;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panelList {
+  display: flex;
+  flex-direction: column;
+}
+
+.panelItem {
+  border-block-start: 1px solid var(--rule);
+}
+
+.panelItem:last-child {
+  border-block-end: 1px solid var(--rule);
+}
+
+.panelLink {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-block: 1.05rem;
+  font-family: var(--font-serif);
+  font-size: 1.625rem;
+  color: var(--navy);
+  text-decoration: none;
+  min-height: 3.25rem;
+}
+
+.panelIndex {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--gold-deep);
+}
+
+.panelFoot {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-block-start: 2.5rem;
+}
+
+.panelTagline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.0625rem;
+  color: var(--navy);
+}
+
+.panelEmail {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-block-end: 1px solid var(--rule-strong);
+  align-self: flex-start;
+  padding-block-end: 2px;
+}
+
+.panelEmail:hover {
+  color: var(--navy);
+  border-block-end-color: var(--navy);
+}
+
+/* ── A partir de tablet horizontal ─────────────────────────────────────── */
+@media (min-width: 62rem) {
+  .nav,
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .toggle {
+    display: none;
+  }
+
+  .panel {
+    display: none;
+  }
+
+  .brandMark {
+    height: 1.5rem;
+  }
+
+  .brandName {
+    font-size: 1rem;
+  }
+}

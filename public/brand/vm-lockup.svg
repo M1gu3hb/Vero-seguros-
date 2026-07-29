@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 306" role="img" aria-labelledby="vm-lockup-title">
+  <title id="vm-lockup-title">Verónica Méndez — Agente de Seguros Certificada — Seguros con Sentido Humano</title>
+  <!--
+    Lockup vertical completo. El texto usa una pila serif/sans; dentro de la
+    aplicación el mismo lockup se compone con Newsreader y Manrope
+    (ver src/components/brand/Lockup.tsx).
+  -->
+  <g transform="translate(113.3 30) scale(0.86)" fill="#13315C" fill-rule="nonzero">
+    <path d="M5 0 L24 0 L53 83 L82 0 L91 0 L56 100 L40 100 Z" />
+    <path d="M0 0 H29 V4.5 H0 Z" />
+    <path d="M78 0 H93 V4.5 H78 Z" />
+    <path d="M97 0 L127 0 L163 100 L149 100 L113 0 L113 100 L97 100 Z" />
+    <path d="M196 0 L220 0 L220 100 L204 100 L204 0 L171 100 L163 100 Z" />
+    <path d="M92 0 H132 V4.5 H92 Z" />
+    <path d="M191 0 H225 V4.5 H191 Z" />
+    <path d="M92 95.5 H118 V100 H92 Z" />
+    <path d="M199 95.5 H225 V100 H199 Z" />
+  </g>
+  <text x="210" y="180" text-anchor="middle" font-family="Newsreader, 'Libre Baskerville', Georgia, serif" font-size="33" letter-spacing="5" fill="#13315C">VERÓNICA</text>
+  <text x="210" y="217" text-anchor="middle" font-family="Newsreader, 'Libre Baskerville', Georgia, serif" font-size="33" letter-spacing="5" fill="#13315C">MÉNDEZ</text>
+  <line x1="116" y1="238" x2="304" y2="238" stroke="#BF9D5B" stroke-width="1" />
+  <text x="210" y="257" text-anchor="middle" font-family="Manrope, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" letter-spacing="3.2" fill="#3C5578">AGENTE DE SEGUROS CERTIFICADA</text>
+  <text x="210" y="288" text-anchor="middle" font-family="Newsreader, 'Libre Baskerville', Georgia, serif" font-style="italic" font-size="19" fill="#13315C">Seguros con Sentido Humano</text>
+  <path d="M133 297 C 168 304, 252 304, 287 297" fill="none" stroke="#BF9D5B" stroke-width="1.2" stroke-linecap="round" />
+</svg>

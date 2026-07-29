@@ -1,0 +1,122 @@
+.footer {
+  background: var(--ink);
+  color: var(--on-navy-muted);
+  padding-block: clamp(2.5rem, 5vw, 3.5rem);
+  font-size: 0.8125rem;
+}
+
+.top {
+  display: grid;
+  gap: 1.75rem;
+  padding-block-end: 1.75rem;
+  border-block-end: 1px solid rgba(248, 239, 230, 0.12);
+}
+
+.brand {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+}
+
+.mark {
+  height: 1.4rem;
+  color: var(--cream);
+}
+
+.name {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cream);
+}
+
+.role {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate-300);
+}
+
+.tagline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.0625rem;
+  color: var(--cream);
+}
+
+.links {
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+}
+
+.linkLabel {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+}
+
+.link {
+  color: var(--cream);
+  text-decoration: none;
+  border-block-end: 1px solid rgba(248, 239, 230, 0.25);
+  justify-self: start;
+  padding-block-end: 2px;
+  word-break: break-word;
+  transition: border-color var(--dur-fast) var(--ease-soft);
+}
+
+.link:hover {
+  border-block-end-color: var(--gold-soft);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.navLink {
+  color: var(--on-navy-muted);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-soft);
+}
+
+.navLink:hover {
+  color: var(--cream);
+}
+
+.bottom {
+  display: grid;
+  gap: 1.15rem;
+  padding-block-start: 1.75rem;
+}
+
+.note {
+  color: rgba(169, 184, 204, 0.85);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  max-width: 62rem;
+}
+
+.copyright {
+  font-size: 0.75rem;
+  color: var(--slate-300);
+}
+
+@media (min-width: 48rem) {
+  .top {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+
+  .bottom {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 2.5rem;
+  }
+}

@@ -1,0 +1,111 @@
+.section {
+  background: var(--paper);
+  position: relative;
+  overflow: hidden;
+}
+
+.head {
+  max-width: 34rem;
+  margin-block-end: clamp(2.5rem, 5vw, 3.75rem);
+}
+
+.title {
+  margin-block-start: 1.25rem;
+  font-size: var(--step-4);
+}
+
+.track {
+  position: relative;
+}
+
+/* Trayectoria que enlaza los tres pasos */
+.line {
+  position: absolute;
+  color: var(--gold);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Vertical en móvil */
+.lineVertical {
+  inset-block: 1.75rem 2rem;
+  inset-inline-start: 0.9rem;
+  width: 2rem;
+}
+
+.lineHorizontal {
+  display: none;
+}
+
+.steps {
+  display: grid;
+  gap: clamp(1.75rem, 4vw, 2.5rem);
+  position: relative;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem 1.15rem;
+  align-items: start;
+}
+
+.marker {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 50%;
+  background: var(--paper);
+  font-family: var(--font-serif);
+  font-size: 0.8125rem;
+  color: var(--navy);
+  flex: none;
+  transition:
+    border-color var(--dur) var(--ease-soft),
+    background-color var(--dur) var(--ease-soft);
+}
+
+.step:hover .marker {
+  border-color: var(--gold);
+  background: var(--cream);
+}
+
+.stepTitle {
+  font-size: var(--step-2);
+  line-height: 1.2;
+}
+
+.stepText {
+  margin-block-start: 0.45rem;
+  color: var(--text-muted);
+  font-size: var(--step--1);
+  line-height: 1.65;
+  max-width: 40ch;
+}
+
+@media (min-width: 48rem) {
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1.5rem, 3vw, 2.75rem);
+    padding-block-start: 3.6rem;
+  }
+
+  .step {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .lineVertical {
+    display: none;
+  }
+
+  .lineHorizontal {
+    display: block;
+    inset-block-start: 0;
+    inset-inline: 4%;
+    width: 92%;
+    height: 2.6rem;
+  }
+}

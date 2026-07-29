@@ -1,0 +1,362 @@
+/* ===========================================================================
+   Verónica Méndez — Seguros con Sentido Humano
+   Sistema de diseño: variables, base tipográfica y primitivas compartidas.
+
+   La paleta y el ritmo se derivan de la tarjeta de presentación: azul marino
+   profundo, crema cálido, hairline dorado, versalitas espaciadas entre reglas
+   finas y una curva continua que atraviesa la composición.
+   =========================================================================== */
+
+:root {
+  /* ── Color ─────────────────────────────────────────────────────────────── */
+  --navy: #13315c;
+  --navy-700: #0f2749;
+  --navy-800: #0a1e3a;
+  --ink: #071426;
+
+  --paper: #fdfaf6;
+  --cream: #f8efe6;
+  --cream-200: #f1e5d8;
+  --cream-300: #e6d7c6;
+
+  --gold: #bf9d5b;
+  --gold-deep: #8a6e36;
+  --gold-soft: #d9c49a;
+
+  --slate: #6c819c;
+  --slate-600: #4a5b73;
+  --slate-300: #a9b8cc;
+
+  /* Semánticos — sobre papel */
+  --text: #12233c;
+  --text-muted: #4a5b73;
+  --text-faint: #74839a;
+  --rule: rgba(19, 49, 92, 0.16);
+  --rule-strong: rgba(19, 49, 92, 0.3);
+
+  /* Semánticos — sobre azul marino */
+  --on-navy: #f8efe6;
+  --on-navy-muted: #b8c6d8;
+  --on-navy-rule: rgba(248, 239, 230, 0.2);
+
+  --focus: #b98f3f;
+
+  /* ── Tipografía ────────────────────────────────────────────────────────── */
+  --font-serif: var(--font-newsreader), 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --font-sans: var(--font-manrope), 'Helvetica Neue', Arial, system-ui, sans-serif;
+
+  /* Escala fluida — de 320px a 1440px */
+  --step--1: clamp(0.8125rem, 0.79rem + 0.11vw, 0.875rem);
+  --step-0: clamp(0.9375rem, 0.9rem + 0.19vw, 1.0625rem);
+  --step-1: clamp(1.0625rem, 1rem + 0.31vw, 1.25rem);
+  --step-2: clamp(1.25rem, 1.13rem + 0.6vw, 1.625rem);
+  --step-3: clamp(1.5rem, 1.29rem + 1.04vw, 2.125rem);
+  --step-4: clamp(1.875rem, 1.53rem + 1.72vw, 2.875rem);
+  --step-5: clamp(2.25rem, 1.66rem + 2.95vw, 4rem);
+  --step-6: clamp(2.625rem, 1.6rem + 5.13vw, 5.625rem);
+
+  /* ── Ritmo y medidas ───────────────────────────────────────────────────── */
+  --gutter: clamp(1.25rem, 0.9rem + 1.75vw, 2.5rem);
+  --measure: 34rem;
+  --max-w: 78rem;
+  --section-y: clamp(4.5rem, 3rem + 7vw, 9rem);
+  --radius: 2px;
+
+  /* ── Movimiento ────────────────────────────────────────────────────────── */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur: 480ms;
+  --dur-fast: 220ms;
+}
+
+/* ── Reset moderado ───────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* Compensa el encabezado fijo al saltar a un ancla */
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  /* Evita cualquier desbordamiento horizontal accidental */
+  overflow-x: hidden;
+}
+
+img,
+svg,
+picture,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  color: var(--navy);
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+}
+
+::selection {
+  background: var(--navy);
+  color: var(--cream);
+}
+
+/* ── Foco visible y coherente ─────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+/* ── Primitivas de composición ────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: var(--max-w);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section-y);
+  position: relative;
+}
+
+/* Etiqueta en versalitas entre reglas finas — tomada de la tarjeta */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+
+.eyebrow::before {
+  content: '';
+  width: clamp(1.5rem, 3vw, 2.75rem);
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.eyebrow--on-navy {
+  color: var(--gold-soft);
+}
+
+/* Texto largo con medida cómoda */
+.prose {
+  max-width: var(--measure);
+  color: var(--text-muted);
+  font-size: var(--step-1);
+  line-height: 1.7;
+}
+
+.prose p + p {
+  margin-top: 1.15em;
+}
+
+/* Sólo para lectores de pantalla */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Enlace de salto al contenido */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  padding: 0.75rem 1.25rem;
+  background: var(--navy);
+  color: var(--on-navy);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transform: translateY(-120%);
+  transition: transform var(--dur-fast) var(--ease-soft);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ── Botones ──────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  padding: 0.875rem 1.65rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  transition:
+    background-color var(--dur-fast) var(--ease-soft),
+    color var(--dur-fast) var(--ease-soft),
+    border-color var(--dur-fast) var(--ease-soft),
+    transform var(--dur-fast) var(--ease-soft);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn--primary {
+  background: var(--navy);
+  color: var(--on-navy);
+  border-color: var(--navy);
+}
+
+.btn--primary:hover {
+  background: var(--navy-800);
+  border-color: var(--navy-800);
+}
+
+.btn--secondary {
+  background: transparent;
+  color: var(--navy);
+  border-color: var(--rule-strong);
+}
+
+.btn--secondary:hover {
+  border-color: var(--navy);
+  background: rgba(19, 49, 92, 0.04);
+}
+
+.btn--on-navy {
+  background: var(--cream);
+  color: var(--navy);
+  border-color: var(--cream);
+}
+
+.btn--on-navy:hover {
+  background: #fff;
+  border-color: #fff;
+}
+
+.btn--ghost-on-navy {
+  background: transparent;
+  color: var(--on-navy);
+  border-color: var(--on-navy-rule);
+}
+
+.btn--ghost-on-navy:hover {
+  border-color: var(--cream);
+  background: rgba(248, 239, 230, 0.08);
+}
+
+/* La flecha del botón se desplaza al pasar el cursor */
+.btn__arrow {
+  transition: transform var(--dur-fast) var(--ease-soft);
+}
+
+.btn:hover .btn__arrow {
+  transform: translateX(3px);
+}
+
+/* ── Bloques sobre azul marino ────────────────────────────────────────────── */
+.on-navy {
+  background: var(--navy);
+  color: var(--on-navy);
+}
+
+.on-navy h1,
+.on-navy h2,
+.on-navy h3,
+.on-navy h4 {
+  color: var(--on-navy);
+}
+
+.on-navy .prose {
+  color: var(--on-navy-muted);
+}
+
+/* ── Movimiento reducido ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
