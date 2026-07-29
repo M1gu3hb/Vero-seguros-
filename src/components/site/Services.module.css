@@ -8,29 +8,27 @@
 
 /* ── Línea que baja de fondo ────────────────────────────────────────────── */
 /*
- * Franja de la mitad derecha. Ocupando la sección entera la diagonal queda tan
- * tendida que el trazo casi no se ve entre renglón y renglón; con esta anchura
- * baja con la inclinación justa para leerse de fondo.
+ * Ocupa la sección entera y se centra: el trazo cruza por el medio, de lado a
+ * lado, por detrás de todos los ramos.
  *
- * La altura la marca la proporción del propio trazo y el bloque se centra: así
- * la línea se ve completa, de un extremo al otro, sin que el lienzo la corte.
+ * `overflow-anchor: none` deja este bloque fuera del mecanismo con el que el
+ * navegador recoloca el desplazamiento cuando el contenido cambia. Es puro
+ * adorno y no debe poder mover la página nunca.
  */
 .coil {
   position: absolute;
-  inset-block-start: 50%;
-  inset-inline-end: -4%;
-  width: min(64%, 52rem);
-  transform: translateY(-50%);
+  inset: 0;
   color: var(--gold);
-  opacity: 0.5;
+  opacity: 0.68;
   pointer-events: none;
+  overflow-anchor: none;
   z-index: 0;
 }
 
 .coil svg {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
 }
 
 .section > :global(.container) {
@@ -56,27 +54,39 @@
 }
 
 /* ── Destacados ────────────────────────────────────────────────────────── */
+/*
+ * Los filetes se dibujan con bordes, no con huecos sobre un fondo: así las
+ * tarjetas no necesitan color propio y la línea que recorre la sección se ve
+ * pasar por detrás de ellas, que es de lo que se trata.
+ */
 .features {
   display: grid;
-  gap: 1px;
-  background: var(--rule);
   border-block: 1px solid var(--rule);
-  margin-block-end: 1px;
 }
 
 .feature {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: clamp(1.9rem, 3.5vw, 3rem) clamp(1.35rem, 3vw, 2.5rem);
-  background: var(--paper);
   overflow: hidden;
   isolation: isolate;
   transition: background-color var(--dur) var(--ease-soft);
 }
 
-.feature:hover {
+.feature + .feature {
+  border-block-start: 1px solid var(--rule);
+}
+
+.featureHead {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: clamp(1.9rem, 3.5vw, 3rem) clamp(1.35rem, 3vw, 2.5rem);
+}
+
+.feature:hover,
+.feature[data-open] {
   background: var(--cream);
 }
 
@@ -261,15 +271,17 @@
   transform: translateY(-2px);
 }
 
+/*
+ * Sin `transform` en el nombre, ni siquiera al pasar el cursor: un elemento
+ * transformado se convierte en el bloque contenedor de lo que lleva dentro, y
+ * eso encogía la zona sensible del ramo al tamaño del título justo al acercar
+ * el ratón. El renglón entero ya se desplaza con su propio relleno, y el
+ * subrayado del nombre es la señal de que se puede abrir.
+ */
 .rowName {
   grid-area: name;
   font-size: var(--step-2);
   line-height: 1.2;
-  transition: transform var(--dur) var(--ease);
-}
-
-.row:hover .rowName {
-  transform: translateX(3px);
 }
 
 .rowText {
@@ -283,7 +295,7 @@
 /* ── Qué cubre cada ramo ────────────────────────────────────────────────── */
 /*
  * El nombre del seguro es el botón, pero la zona sensible se extiende sobre
- * todo el bloque: así se puede pulsar en cualquier parte de la tarjeta o del
+ * toda la cabecera: así se puede pulsar en cualquier parte de la tarjeta o del
  * renglón y, aun así, lo que anuncia un lector de pantalla sigue siendo el
  * nombre del ramo.
  */
@@ -296,10 +308,22 @@
   color: inherit;
   text-align: inherit;
   cursor: pointer;
+
+  /* Subrayado que crece al pasar el cursor: es la señal de que se puede abrir */
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 calc(100% - 0.06em);
+  background-size: 0 1px;
+  transition: background-size var(--dur) var(--ease);
 }
 
-.trigger::after {
-  content: '';
+.featureHead:hover .trigger,
+.rowInner:hover .trigger,
+.trigger:focus-visible {
+  background-size: 100% 1px;
+}
+
+.cover {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -309,44 +333,39 @@
   outline: none;
 }
 
-.trigger:focus-visible::after {
+.trigger:focus-visible .cover {
   outline: 2px solid var(--gold-deep);
   outline-offset: -3px;
   border-radius: 2px;
 }
 
-/* Signo de más que gira hasta convertirse en un menos */
-.marker {
+/* ── El signo de estado ──────────────────────────────────────────────────
+   Dos barras que giran y se encogen para pasar de más a punta de flecha y de
+   ahí a menos. El movimiento lo lleva la animación; aquí sólo va la forma. */
+.marca {
   position: relative;
   display: inline-block;
-  width: 0.72rem;
-  height: 0.72rem;
+  width: 0.75rem;
+  height: 0.75rem;
   flex: none;
 }
 
-.markerBar {
+.marcaBarra {
   position: absolute;
   inset-block-start: 50%;
   inset-inline-start: 0;
   width: 100%;
   height: 1px;
+  margin-block-start: -0.5px;
   background: currentColor;
-  transition: transform var(--dur) var(--ease);
-}
-
-.markerBarUp {
-  transform: rotate(90deg);
-}
-
-[data-open] .markerBarUp {
-  transform: rotate(0deg);
+  transform-origin: center;
 }
 
 /* Aviso discreto en las tarjetas destacadas */
 .hint {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.6rem;
   margin-block-start: 0.35rem;
   font-size: 0.6875rem;
   font-weight: 600;
@@ -360,20 +379,22 @@
   color: var(--navy);
 }
 
-/* El marcador del índice va al final del renglón */
-.rowInner > .marker {
+/* El signo del índice va al final del renglón */
+.rowInner > .marca {
   grid-area: mark;
   justify-self: end;
   color: var(--gold-deep);
 }
 
+/* ── El texto desplegado ─────────────────────────────────────────────────
+   Separado del filete y con sangría, para que no quede pegado al borde. */
 .detail {
   color: var(--text-muted);
 }
 
 .detailText {
-  padding-block: 1.1rem 1.4rem;
-  padding-inline-end: clamp(0.25rem, 2vw, 1.25rem);
+  padding-block: 1.15rem 1.5rem;
+  padding-inline: clamp(1.1rem, 4vw, 3rem) clamp(1.1rem, 3vw, 2.5rem);
   border-block-start: 1px solid var(--rule);
   font-size: var(--step--1);
   line-height: 1.72;
@@ -381,7 +402,8 @@
 }
 
 .feature .detailText {
-  padding-block-end: 0.25rem;
+  padding-inline: clamp(1.35rem, 3vw, 2.5rem);
+  padding-block-end: clamp(1.6rem, 3vw, 2.4rem);
 }
 
 @media (min-width: 48rem) {
@@ -393,6 +415,11 @@
 
   .features {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .feature + .feature {
+    border-block-start: 0;
+    border-inline-start: 1px solid var(--rule);
   }
 
   .rowInner {

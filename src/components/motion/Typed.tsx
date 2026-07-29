@@ -3,32 +3,61 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useInView, useReducedMotion } from 'motion/react'
 
-type TypedProps = {
+type Bloque = {
   text: string
   className?: string
+}
+
+type TypedProps = {
+  /** Los párrafos, en orden. Se escriben de corrido, uno tras otro. */
+  blocks: Bloque[]
   /** Milisegundos entre palabra y palabra. */
   speed?: number
-  /** Espera antes de empezar, en milisegundos. */
+  /** Espera antes de la primera palabra, en milisegundos. */
   delay?: number
+  /** Envuelve los bloques a partir del índice indicado. */
+  bodyFrom?: number
+  bodyClassName?: string
 }
 
 /**
  * Texto que se escribe solo al llegar a él.
  *
- * Va palabra por palabra, no letra por letra: en un texto largo el efecto
- * lee igual de «máquina de escribir» y se termina en un tiempo razonable, en
- * lugar de obligar a esperar medio minuto para leer un párrafo.
+ * Todos los párrafos forman una sola tirada: empieza por la primera palabra y
+ * no se detiene hasta la última, de principio a fin, sin arrancar de nuevo en
+ * cada párrafo. Va palabra por palabra, no letra por letra: en un texto largo
+ * el efecto lee igual de «máquina de escribir» y no obliga a esperar una
+ * eternidad para terminar de leer.
  *
  * El texto completo está siempre en el HTML —cada palabra es un `span` que
  * sólo cambia de opacidad—, así que los lectores de pantalla y los buscadores
- * ven el párrafo entero desde el principio, se ejecute o no la animación.
- * Si el sistema pide movimiento reducido, no se anima nada.
+ * ven todo desde el principio, se ejecute o no la animación. Si el sistema
+ * pide movimiento reducido, no se anima nada.
  */
-export function Typed({ text, className, speed = 26, delay = 0 }: TypedProps) {
+export function Typed({
+  blocks,
+  speed = 45,
+  delay = 250,
+  bodyFrom,
+  bodyClassName,
+}: TypedProps) {
   const reduceMotion = useReducedMotion()
-  const ref = useRef<HTMLParagraphElement>(null)
-  const inView = useInView(ref, { once: true, amount: 0.35 })
-  const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text])
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, amount: 0.12 })
+
+  /* Cada bloque con sus palabras y con la posición desde la que empieza a
+     contar dentro de la tirada completa. */
+  const partes = useMemo(() => {
+    let acumulado = 0
+    return blocks.map((bloque) => {
+      const words = bloque.text.split(/\s+/).filter(Boolean)
+      const offset = acumulado
+      acumulado += words.length
+      return { ...bloque, words, offset }
+    })
+  }, [blocks])
+
+  const total = partes.reduce((suma, parte) => suma + parte.words.length, 0)
 
   /*
    * `null` significa «todavía no decide el cliente»: es el estado con el que
@@ -45,43 +74,56 @@ export function Typed({ text, className, speed = 26, delay = 0 }: TypedProps) {
 
   useEffect(() => {
     if (reduceMotion || !inView || shown === null) return
-    if (shown >= words.length) return
 
     let frame = 0
-    let start: number | null = null
+    let inicio: number | null = null
 
-    const step = (now: number) => {
-      if (start === null) start = now
-      const elapsed = now - start - delay
-      const target = elapsed < 0 ? 0 : Math.min(words.length, Math.floor(elapsed / speed) + 1)
-      setShown(target)
-      if (target < words.length) frame = requestAnimationFrame(step)
+    const paso = (ahora: number) => {
+      if (inicio === null) inicio = ahora
+      const transcurrido = ahora - inicio - delay
+      const objetivo = transcurrido < 0 ? 0 : Math.min(total, Math.floor(transcurrido / speed) + 1)
+      setShown(objetivo)
+      if (objetivo < total) frame = requestAnimationFrame(paso)
     }
 
-    frame = requestAnimationFrame(step)
+    frame = requestAnimationFrame(paso)
     return () => cancelAnimationFrame(frame)
-    // Sólo debe arrancar una vez, cuando el párrafo entra en pantalla.
+    // Arranca una sola vez, cuando el texto entra en pantalla.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, reduceMotion, shown === null])
 
-  const typing = shown !== null && shown < words.length
+  const escribiendo = shown !== null && shown < total
 
-  return (
-    <p ref={ref} className={className} data-typed={typing ? '' : undefined}>
-      {words.map((word, index) => {
-        const visible = shown === null || index < shown
+  const parrafo = (parte: (typeof partes)[number], key: number) => (
+    <p key={key} className={parte.className}>
+      {parte.words.map((word, index) => {
+        const posicion = parte.offset + index
+        const visible = shown === null || posicion < shown
         return (
           <Fragment key={`${index}-${word}`}>
             <span
               data-typed-word={visible ? undefined : 'oculta'}
-              data-typed-caret={typing && index === shown - 1 ? '' : undefined}
+              data-typed-caret={escribiendo && posicion === shown - 1 ? '' : undefined}
             >
               {word}
             </span>
-            {index < words.length - 1 ? ' ' : null}
+            {index < parte.words.length - 1 ? ' ' : null}
           </Fragment>
         )
       })}
     </p>
+  )
+
+  const corte = bodyFrom ?? partes.length
+
+  return (
+    <div ref={ref} data-typed={escribiendo ? '' : undefined}>
+      {partes.slice(0, corte).map((parte, index) => parrafo(parte, index))}
+      {corte < partes.length ? (
+        <div className={bodyClassName}>
+          {partes.slice(corte).map((parte, index) => parrafo(parte, corte + index))}
+        </div>
+      ) : null}
+    </div>
   )
 }
