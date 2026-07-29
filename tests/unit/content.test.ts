@@ -53,6 +53,20 @@ describe('contenido inicial', () => {
     ])
   })
 
+  it('las aseguradoras traen su logotipo oficial y un texto alternativo', () => {
+    const conLogo = defaultInsurers.filter((insurer) => insurer.imageUrl)
+    expect(conLogo.length).toBe(9)
+
+    for (const insurer of conLogo) {
+      expect(insurer.imageUrl).toMatch(/^\/brand\/aseguradoras\/[a-z]+\.svg$/)
+      expect(insurer.imageAlt).toBeTruthy()
+    }
+
+    // Mutus se muestra con su nombre en tipografía
+    const mutus = defaultInsurers.find((insurer) => insurer.name === 'Mutus')
+    expect(mutus?.imageUrl).toBeNull()
+  })
+
   it('no incluye «etcétera» como si fuera una aseguradora', () => {
     const names = defaultInsurers.map((insurer) => insurer.name.toLowerCase())
     expect(names).not.toContain('etcétera')

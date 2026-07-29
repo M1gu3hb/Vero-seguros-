@@ -74,22 +74,23 @@ values
 on conflict (slug) do nothing;
 
 -- ── Aseguradoras ───────────────────────────────────────────────────────────
--- Sólo nombres. Los logotipos se agregan después, si la marca lo autoriza,
--- desde el CMS (imagen opcional por aseguradora).
-insert into public.insurers (name, sort_order, is_visible)
-select v.name, v.sort_order, true
+-- Los logotipos incluidos viven en `public/brand/aseguradoras/`. Mutus se
+-- muestra con su nombre en tipografía; se le puede cargar un logotipo desde
+-- el CMS en cualquier momento.
+insert into public.insurers (name, image_url, image_alt, sort_order, is_visible)
+select v.name, v.url, v.alt, v.sort_order, true
 from (values
-  ('Zurich', 1),
-  ('GNP', 2),
-  ('MAPFRE', 3),
-  ('MetLife', 4),
-  ('SURA', 5),
-  ('Chubb', 6),
-  ('AXA', 7),
-  ('Afirme', 8),
-  ('Mutus', 9),
-  ('VRIM', 10)
-) as v(name, sort_order)
+  ('Zurich',  '/brand/aseguradoras/zurich.svg',  'Zurich',       1),
+  ('GNP',     '/brand/aseguradoras/gnp.svg',     'GNP Seguros',  2),
+  ('MAPFRE',  '/brand/aseguradoras/mapfre.svg',  'MAPFRE',       3),
+  ('MetLife', '/brand/aseguradoras/metlife.svg', 'MetLife',      4),
+  ('SURA',    '/brand/aseguradoras/sura.svg',    'Seguros SURA', 5),
+  ('Chubb',   '/brand/aseguradoras/chubb.svg',   'Chubb',        6),
+  ('AXA',     '/brand/aseguradoras/axa.svg',     'AXA',          7),
+  ('Afirme',  '/brand/aseguradoras/afirme.svg',  'Afirme',       8),
+  ('Mutus',   null,                              null,           9),
+  ('VRIM',    '/brand/aseguradoras/vrim.svg',    'VRIM',        10)
+) as v(name, url, alt, sort_order)
 where not exists (
   select 1 from public.insurers i where i.name = v.name
 );

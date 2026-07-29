@@ -30,31 +30,16 @@
   width: 100%;
   overflow: hidden;
   border-block: 1px solid var(--rule);
-  padding-block: clamp(1.25rem, 2.5vw, 1.75rem);
   /* Difumina los extremos para que la cinta no se corte de golpe */
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 8%,
-    #000 92%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 8%,
-    #000 92%,
-    transparent 100%
-  );
+  mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
 }
 
 .marqueeTrack {
   display: flex;
   align-items: center;
   flex: none;
-  gap: clamp(2rem, 5vw, 4rem);
-  padding-inline-end: clamp(2rem, 5vw, 4rem);
-  animation: slide 42s linear infinite;
+  animation: slide 48s linear infinite;
 }
 
 .marquee:hover .marqueeTrack,
@@ -71,33 +56,60 @@
   }
 }
 
+/* Cada marca va entre reglas finas, como en la tarjeta de presentación */
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: clamp(9rem, 18vw, 13rem);
+  min-height: clamp(4.75rem, 9vw, 6rem);
+  padding-inline: clamp(1.25rem, 3vw, 2.25rem);
+  border-inline-end: 1px solid var(--rule);
+}
+
+/* Logotipo oficial. Todos los archivos comparten un lienzo de la misma altura
+   con la escala óptica ya aplicada, así que basta una altura común. */
+.logo {
+  height: clamp(1.9rem, 3.4vw, 2.5rem);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  transition:
+    opacity var(--dur) var(--ease-soft),
+    transform var(--dur) var(--ease);
+}
+
+/* Nombre en tipografía para las marcas sin logotipo cargado */
 .name {
   font-family: var(--font-serif);
-  font-size: clamp(1.25rem, 3.2vw, 1.875rem);
+  font-size: clamp(1.2rem, 2.8vw, 1.65rem);
   letter-spacing: 0.06em;
   color: var(--navy);
   white-space: nowrap;
-  opacity: 0.85;
+  opacity: 0.9;
   transition: opacity var(--dur-fast) var(--ease-soft);
 }
 
-.name:hover {
-  opacity: 1;
+.item:hover .logo {
+  transform: translateY(-2px);
 }
 
-.logo {
-  height: clamp(1.75rem, 4vw, 2.5rem);
-  width: auto;
-  object-fit: contain;
+.item:hover .name {
+  opacity: 1;
 }
 
 /* ── Alternativa estática ──────────────────────────────────────────────── */
 .staticList {
   display: none;
   flex-wrap: wrap;
-  gap: 0.75rem 2rem;
+  align-items: center;
   border-block: 1px solid var(--rule);
-  padding-block: 1.5rem;
+}
+
+.staticList .item {
+  min-width: clamp(8rem, 15vw, 11rem);
+  min-height: 4.5rem;
 }
 
 /* Sin animación cuando el sistema pide movimiento reducido */

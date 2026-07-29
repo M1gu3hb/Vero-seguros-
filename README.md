@@ -387,9 +387,10 @@ Detalles útiles:
 - **Servicios y aseguradoras.** Usa las flechas para reordenar; el orden se
   guarda solo. «Ocultar» los quita del sitio sin borrarlos; «Eliminar» pide
   confirmación y no se puede deshacer.
-- **Logotipos de aseguradoras.** Sólo súbelos si cuentas con autorización de la
-  marca. Sin logotipo se muestra el nombre en tipografía, que es la
-  presentación por omisión.
+- **Logotipos de aseguradoras.** El proyecto incluye los logotipos oficiales de
+  nueve de ellas en `public/brand/aseguradoras/`. Si una marca no tiene
+  logotipo cargado se muestra su nombre en tipografía, que es la presentación
+  por omisión. Para añadir o sustituir uno, súbelo desde el CMS.
 - **Promociones.** Puedes ocultar toda la sección si en algún momento deja de
   haber facilidades vigentes.
 
@@ -411,8 +412,28 @@ no se inventó:
   `#F8EFE6`, dorado mate `#BF9D5B` y azul grisáceo `#6C819C`.
 - **La tipografía** combina Newsreader (serif editorial, también en cursiva para
   la frase de marca) con Manrope (sans humanista). Dos familias, ninguna más.
-- **El movimiento** es discreto y siempre respeta `prefers-reduced-motion`: sin
-  animaciones la página conserva estructura, jerarquía y funcionalidad.
+- **El movimiento** es discreto y siempre respeta `prefers-reduced-motion`. La
+  garantía la da el CSS, no JavaScript: `[data-reveal]`, `[data-parallax]` y
+  `[data-draw]` se fijan en su estado final con `!important`, que gana a los
+  estilos en línea de la librería de animación. Así el contenido nunca depende
+  de que un hook se haya inicializado a tiempo ni de la hidratación.
+
+### Logotipos de las aseguradoras
+
+Los logotipos que vienen con el proyecto son **archivos oficiales de cada
+marca**, no versiones redibujadas: ocho proceden de Wikimedia Commons y el de
+VRIM de su propio sitio. Están en `public/brand/aseguradoras/`.
+
+Cada archivo se normalizó a un lienzo común de 120 unidades de alto, con una
+escala óptica por marca (`0.66` para el bloque macizo de Chubb, `1.00` para
+MAPFRE, etc.). Sin ese ajuste, a la misma altura bruta un cuadrado sólido pesa
+mucho más que un logotipo ancho de trazo fino y la cinta se ve desordenada.
+
+Los logotipos son marcas registradas de sus titulares. Se muestran para
+identificar a las aseguradoras con las que Verónica trabaja; el sitio no
+sugiere en ningún momento que ellas lo patrocinen o lo certifiquen, y la nota
+de la sección lo deja claro. Si alguna marca pide retirarlo, basta con quitar
+la imagen desde el CMS: la aseguradora seguirá apareciendo con su nombre.
 
 Accesibilidad y rendimiento: HTML semántico, jerarquía correcta de encabezados,
 navegación completa por teclado, foco siempre visible, contraste AA, diálogos

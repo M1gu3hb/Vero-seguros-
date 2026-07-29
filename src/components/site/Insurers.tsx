@@ -10,14 +10,21 @@ type InsurersProps = {
 
 function InsurerMark({ insurer }: { insurer: Insurer }) {
   if (insurer.imageUrl) {
-    /* Logotipo opcional cargado desde el CMS. Se usa <img> porque las marcas
-       tienen proporciones muy distintas y aquí sólo interesa la altura. */
+    /*
+     * Logotipo oficial de la marca. Se usa <img> y no next/image porque los
+     * archivos incluidos son SVG —que next/image no optimiza— y porque aquí
+     * sólo interesa fijar la altura y dejar que el ancho se acomode.
+     */
     return (
       <img
         src={insurer.imageUrl}
         alt={insurer.imageAlt ?? insurer.name}
         className={styles.logo}
-        loading="lazy"
+        /*
+         * Sin carga diferida a propósito: dentro de una cinta desplazada con
+         * `transform` hay logotipos que nunca entran en la ventana visible y
+         * `loading="lazy"` los dejaría sin cargar. Son SVG de unos pocos KB.
+         */
         decoding="async"
       />
     )
@@ -29,10 +36,13 @@ function InsurerMark({ insurer }: { insurer: Insurer }) {
 /**
  * Aseguradoras con las que trabaja.
  *
- * Se presentan por su nombre, en tipografía, sin logotipos descargados sin
- * autorización. La cinta avanza muy despacio, se detiene al pasar el cursor o
- * al recibir foco, y desaparece por completo si el sistema pide movimiento
- * reducido (en su lugar se muestra la lista estática).
+ * Se muestran con su logotipo oficial, separadas por reglas finas como en la
+ * tarjeta de presentación. Si una marca no tiene logotipo cargado, aparece su
+ * nombre en tipografía.
+ *
+ * La cinta avanza muy despacio, se detiene al pasar el cursor o al recibir
+ * foco, y desaparece por completo si el sistema pide movimiento reducido: en
+ * ese caso se muestra la lista estática.
  */
 export function Insurers({ insurers }: InsurersProps) {
   if (insurers.length === 0) return null
@@ -55,11 +65,11 @@ export function Insurers({ insurers }: InsurersProps) {
       </div>
 
       <Reveal y={12}>
-        {/* Lista real y accesible: el lector de pantalla lee ésta una sola vez */}
         <div className={styles.marquee}>
+          {/* Lista real y accesible: el lector de pantalla lee ésta una sola vez */}
           <ul className={styles.marqueeTrack}>
             {insurers.map((insurer) => (
-              <li key={insurer.id}>
+              <li key={insurer.id} className={styles.item}>
                 <InsurerMark insurer={insurer} />
               </li>
             ))}
@@ -67,7 +77,7 @@ export function Insurers({ insurers }: InsurersProps) {
           {/* Copia puramente visual para que la cinta no tenga huecos */}
           <ul className={styles.marqueeTrack} aria-hidden="true">
             {insurers.map((insurer) => (
-              <li key={`echo-${insurer.id}`}>
+              <li key={`echo-${insurer.id}`} className={styles.item}>
                 <InsurerMark insurer={insurer} />
               </li>
             ))}
@@ -77,7 +87,7 @@ export function Insurers({ insurers }: InsurersProps) {
         <div className="container">
           <ul className={styles.staticList}>
             {insurers.map((insurer) => (
-              <li key={`static-${insurer.id}`}>
+              <li key={`static-${insurer.id}`} className={styles.item}>
                 <InsurerMark insurer={insurer} />
               </li>
             ))}
