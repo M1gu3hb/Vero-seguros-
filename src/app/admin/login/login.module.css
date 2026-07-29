@@ -1,0 +1,110 @@
+.wrap {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 2rem 1.25rem;
+  background: var(--cream);
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 25rem;
+  padding: clamp(1.75rem, 5vw, 2.5rem);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--gold-soft);
+  border-radius: var(--radius);
+  transform: translate(9px, 9px);
+  z-index: -1;
+  opacity: 0.6;
+}
+
+.head {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  text-align: center;
+  margin-block-end: 1.75rem;
+}
+
+.mark {
+  height: 2rem;
+  color: var(--navy);
+}
+
+.title {
+  font-size: 1.375rem;
+}
+
+.subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.form {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  min-height: 2.9rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-size: 0.9375rem;
+}
+
+.input:focus-visible {
+  border-color: var(--navy);
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.error {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(163, 44, 44, 0.35);
+  border-radius: var(--radius);
+  background: rgba(163, 44, 44, 0.06);
+  color: #8f2626;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.submit {
+  width: 100%;
+  margin-block-start: 0.25rem;
+}
+
+.back {
+  display: block;
+  margin-block-start: 1.5rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.back:hover {
+  color: var(--navy);
+}
