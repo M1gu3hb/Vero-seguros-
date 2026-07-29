@@ -228,7 +228,7 @@ Copia `.env.example` a `.env.local`.
 
 | Variable | Obligatoria | Para qué sirve |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Recomendada | URL canónica para metadatos, Open Graph, `sitemap.xml` y `robots.txt`. En Vercel, si no se define, se usa el dominio de producción del proyecto. |
+| `NEXT_PUBLIC_SITE_URL` | Sólo fuera de Vercel | URL canónica para metadatos, Open Graph, `sitemap.xml` y `robots.txt`. **En Vercel no hace falta y no manda**: gana el dominio principal del proyecto, que la plataforma mantiene al día. Ver [Dominios](#dominios). |
 | `NEXT_PUBLIC_SUPABASE_URL` | No | URL del proyecto de Supabase. Si no se define se usa el proyecto de producción. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No | Clave pública de Supabase. Igual que la anterior. |
 | `SUPABASE_SERVICE_ROLE_KEY` | No | **No la usa la aplicación.** Sólo para tareas de mantenimiento por línea de comandos. Nunca debe llevar el prefijo `NEXT_PUBLIC_` ni llegar al navegador. |
@@ -510,19 +510,27 @@ El proyecto está pensado para desplegarse desde GitHub:
 1. En Vercel, **Add New → Project** e importa `M1gu3hb/Vero-seguros-`.
 2. Framework: **Next.js** (se detecta solo). No hace falta cambiar los comandos.
 3. Rama de producción: **`main`**.
-4. En **Settings → Environment Variables**, define al menos:
-
-   ```
-   NEXT_PUBLIC_SITE_URL = https://tu-dominio.vercel.app
-   ```
-
-   Y, si quieres apuntar a otro proyecto de Supabase, también
+4. En **Settings → Environment Variables** no hace falta definir nada para que
+   funcione. Sólo si quieres apuntar a otro proyecto de Supabase:
    `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 5. **Deploy**. Cada push a `main` publica una nueva versión.
 
-Después del primer despliegue conviene actualizar `NEXT_PUBLIC_SITE_URL` con la
-URL definitiva para que el canonical, el `sitemap.xml` y las tarjetas de
-Open Graph apunten al sitio correcto.
+### Dominios
+
+La dirección canónica del sitio —la del `<link rel="canonical">`, la de las
+tarjetas de Open Graph, el `robots.txt` y el `sitemap.xml`— sale del **dominio
+principal del proyecto en Vercel**, no de una variable de entorno.
+
+Es a propósito, y va contra la costumbre de que una variable explícita gane
+siempre: una variable con el dominio escrito a mano es una copia, y una copia se
+queda vieja. Pasó de verdad: al renombrar el dominio del proyecto, la variable
+siguió apuntando al anterior y todos los metadatos quedaron señalando una
+dirección que ya sólo redirige —lo que le dice a Google que indexe una página
+que no es y rompe la vista previa al compartir el enlace—.
+
+Así que **para cambiar de dominio basta con cambiarlo en Vercel** y volver a
+desplegar: los metadatos siguen solos. `NEXT_PUBLIC_SITE_URL` se queda para
+cuando el sitio no vive en Vercel; ahí sí manda.
 
 ---
 
