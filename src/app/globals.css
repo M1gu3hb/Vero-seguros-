@@ -536,6 +536,54 @@ hr {
   }
 }
 
+/* ── Campo de contraseña con ojo ──────────────────────────────────────────── */
+/*
+ * Vive aquí y no en un módulo porque lo usan las dos pantallas que piden
+ * contraseña —el acceso y «Tu cuenta»—, y cada una tiene su propia hoja.
+ *
+ * El ojo va dentro del campo, sobre el borde derecho. El hueco lo abre el
+ * relleno del propio `input`, así que el texto nunca pasa por debajo.
+ */
+.campoClave {
+  position: relative;
+  display: block;
+}
+
+.campoClave input {
+  padding-inline-end: 3rem;
+}
+
+.ojoClave {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft, #5b6472);
+  cursor: pointer;
+  transition: color var(--dur, 0.24s) var(--ease, ease);
+}
+
+.ojoClave svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.ojoClave:hover,
+.ojoClave[aria-pressed='true'] {
+  color: var(--navy);
+}
+
+.ojoClave:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -3px;
+  border-radius: var(--radius);
+}
+
 /* ── Movimiento reducido ──────────────────────────────────────────────────── */
 /*
  * El CSS es la fuente autoritativa de esta preferencia, así que aquí se fija
