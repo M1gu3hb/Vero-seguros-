@@ -173,6 +173,8 @@
   font-size: clamp(3.5rem, 7vw, 5.5rem);
   line-height: 1;
   color: var(--gold);
+  opacity: 0.22;
+  transform-origin: left top;
   pointer-events: none;
 }
 

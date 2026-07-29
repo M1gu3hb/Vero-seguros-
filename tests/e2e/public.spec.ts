@@ -242,17 +242,19 @@ test.describe('movimiento reducido', () => {
     await expect(page.getByRole('heading', { name: 'Seguro de Vida' })).toBeVisible()
     await expect(page.getByRole('heading', { level: 2, name: /Sobre Verónica/ })).toBeVisible()
 
-    // Ni las palabras que normalmente se componen una a una, ni el texto que
-    // se escribe solo, ni los filetes que se trazan bajo un título
-    const escondidas = await page
-      .locator('[data-typed-word="oculta"], [data-rule]')
-      .evaluateAll((nodes) =>
-        nodes.filter((n) => {
-          const cs = getComputedStyle(n)
-          return Number.parseFloat(cs.opacity) < 0.99 || cs.transform !== 'none'
-        }).length,
-      )
-    expect(escondidas).toBe(0)
+    // El texto que se escribe solo aparece entero: ninguna palabra queda atrás
+    expect(await page.locator('[data-typed-word="oculta"]').count()).toBe(0)
+
+    /*
+     * Y los adornos que se animan con transformaciones —los filetes que se
+     * trazan bajo un título, la comilla de la cita— quedan en su tamaño
+     * final. Aquí sólo se comprueba la transformación: su opacidad de reposo
+     * la fija el CSS y no tiene por qué ser 1.
+     */
+    const adornos = await page
+      .locator('[data-rule]')
+      .evaluateAll((nodes) => nodes.filter((n) => getComputedStyle(n).transform !== 'none').length)
+    expect(adornos).toBe(0)
   })
 
   test('cada seguro se abre y explica qué cubre', async ({ page }) => {

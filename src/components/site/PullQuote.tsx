@@ -40,12 +40,18 @@ export function PullQuote({ text, attribution }: PullQuoteProps) {
         transition={reduceMotion ? { duration: 0 } : { duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
       />
 
+      {/*
+        La comilla es un adorno y su opacidad de reposo vive en el CSS, no en
+        la animación: la regla de movimiento reducido lleva todo lo marcado
+        como aparición a opacidad 1, y aquí eso dejaría una comilla dorada
+        maciza en vez de la marca de agua que se busca.
+      */}
       <motion.span
         className={styles.quoteMark}
-        data-reveal=""
+        data-rule=""
         aria-hidden="true"
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }}
-        whileInView={{ opacity: 0.22, scale: 1 }}
+        initial={reduceMotion ? false : { scale: 0.7 }}
+        whileInView={{ scale: 1 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={enter(0.18)}
       >

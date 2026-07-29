@@ -575,7 +575,9 @@ hr {
     stroke-dashoffset: 0 !important;
   }
 
-  /* Filetes que se trazan bajo un título: dibujados de una vez */
+  /* Adornos que sólo se animan con transformaciones —filetes que se trazan,
+     la comilla de la cita—: directamente en su sitio y a su tamaño. Su
+     opacidad de reposo la fija el CSS, así que no se toca. */
   [data-rule] {
     transform: none !important;
   }
