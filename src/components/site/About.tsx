@@ -3,7 +3,8 @@ import Image from 'next/image'
 import { Monogram } from '@/components/brand/Monogram'
 import { Reveal } from '@/components/motion/Reveal'
 import { Tilt } from '@/components/motion/Tilt'
-import { Typed } from '@/components/motion/Typed'
+import { Txt } from '@/components/content/Texts'
+import { Biografia } from '@/components/site/Biografia'
 import { PullQuote } from '@/components/site/PullQuote'
 import { CropMarks, SectionEyebrow } from '@/components/site/SectionHeading'
 import { SECTIONS } from '@/lib/site'
@@ -17,27 +18,16 @@ type AboutProps = {
 /**
  * Sobre Verónica.
  *
- * La biografía se escribe sola al llegar a ella, párrafo por párrafo, y la
- * frase que la resume pasa —en pantallas anchas— justo debajo de la
- * fotografía, que era donde quedaba el hueco. En el HTML la cita sigue
- * después del texto, así que en un teléfono se lee en el orden natural: foto,
- * historia y, al final, la frase.
+ * La biografía se escribe sola al llegar a ella y la frase que la resume
+ * pasa —en pantallas anchas— justo debajo de la fotografía, que era donde
+ * quedaba el hueco. En el HTML la cita sigue después del texto, así que en un
+ * teléfono se lee en el orden natural: foto, historia y, al final, la frase.
  *
  * Si todavía no hay una fotografía real, la columna visual se resuelve con
  * una composición tipográfica basada en el monograma: nunca con una persona
  * inventada.
  */
 export function About({ settings }: AboutProps) {
-  /*
-   * Se acepta cualquier convención de salto de línea: el navegador envía los
-   * `textarea` con CRLF, así que un texto guardado antes de normalizarlo en el
-   * servidor puede traer `\r\n\r\n` en vez de `\n\n`.
-   */
-  const paragraphs = settings.aboutBody
-    .split(/(?:\r\n?|\n)\s*(?:\r\n?|\n)/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean)
-
   const photoAlt = settings.aboutImageAlt ?? `${settings.brandName}, ${settings.brandRole}`
 
   return (
@@ -68,8 +58,12 @@ export function About({ settings }: AboutProps) {
                     <span />
                     <span />
                   </span>
-                  <p className={styles.markTagline}>{settings.brandTagline}</p>
-                  <p className={styles.markSince}>Agente desde 2018</p>
+                  <p className={styles.markTagline}>
+                    <Txt k="identidad.frase" />
+                  </p>
+                  <p className={styles.markSince}>
+                    <Txt k="sobre.desde" />
+                  </p>
                 </div>
               )}
             </figure>
@@ -78,32 +72,17 @@ export function About({ settings }: AboutProps) {
 
         <div className={styles.content}>
           <Reveal>
-            <SectionEyebrow index="04" label="Trayectoria" />
+            <SectionEyebrow index="04" label={<Txt k="sobre.etiqueta" />} />
             <h2 id="sobre-titulo" className={styles.title}>
-              {settings.aboutTitle}
+              <Txt k="sobre.titulo" />
             </h2>
           </Reveal>
 
-          {/*
-            La introducción y la biografía se escriben de corrido, como un solo
-            texto: empieza en la primera palabra y no para hasta la última.
-          */}
-          <Typed
-            speed={48}
-            bodyFrom={1}
-            bodyClassName={styles.body}
-            blocks={[
-              { text: settings.aboutIntro, className: styles.intro },
-              ...paragraphs.map((paragraph) => ({ text: paragraph })),
-            ]}
-          />
+          <Biografia introClassName={styles.intro} bodyClassName={styles.body} />
         </div>
 
         <div className={styles.quoteSlot}>
-          <PullQuote
-            text={settings.aboutQuote}
-            attribution={`${settings.brandName} — ${settings.brandRole}`}
-          />
+          <PullQuote />
         </div>
       </div>
     </section>

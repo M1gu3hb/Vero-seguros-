@@ -5,6 +5,7 @@ import { CropMarks } from '@/components/site/SectionHeading'
 import { Trajectory } from '@/components/brand/Trajectory'
 import { ParallaxMark } from '@/components/motion/ParallaxMark'
 import { Reveal } from '@/components/motion/Reveal'
+import { Txt } from '@/components/content/Texts'
 import { MailLink } from '@/components/site/MailLink'
 import { SWASH_PATH } from '@/lib/brand'
 import { SECTIONS } from '@/lib/site'
@@ -31,17 +32,21 @@ export function Hero({ settings, whatsappUrl, mailtoUrl, webmailUrl }: HeroProps
       <div className={`container ruled ${styles.grid}`}>
         <div>
           <Reveal y={12}>
-            <p className="eyebrow">{settings.heroEyebrow}</p>
+            <p className="eyebrow">
+              <Txt k="inicio.etiqueta" />
+            </p>
           </Reveal>
 
           <Reveal delay={0.08}>
             <h1 id="hero-title" className={styles.title}>
-              {settings.heroTitle}
+              <Txt k="inicio.titulo" />
             </h1>
           </Reveal>
 
           <Reveal delay={0.16}>
-            <p className={styles.description}>{settings.heroDescription}</p>
+            <p className={styles.description}>
+              <Txt k="inicio.descripcion" />
+            </p>
           </Reveal>
 
           <Reveal delay={0.24}>
@@ -53,14 +58,14 @@ export function Hero({ settings, whatsappUrl, mailtoUrl, webmailUrl }: HeroProps
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {settings.heroPrimaryCta}
+                  <Txt k="inicio.botonWhatsapp" />
                   <span className="btn__arrow" aria-hidden="true">
                     →
                   </span>
                 </a>
               ) : null}
               <MailLink className="btn btn--secondary" href={mailtoUrl} webmailHref={webmailUrl}>
-                {settings.heroSecondaryCta}
+                <Txt k="inicio.botonCorreo" />
               </MailLink>
             </div>
           </Reveal>
@@ -68,7 +73,7 @@ export function Hero({ settings, whatsappUrl, mailtoUrl, webmailUrl }: HeroProps
           <Reveal delay={0.3}>
             <p className={styles.coverage}>
               <span className={styles.coverageDot} aria-hidden="true" />
-              {settings.coverageText}
+              <Txt k="identidad.cobertura" />
             </p>
           </Reveal>
         </div>
@@ -91,14 +96,20 @@ export function Hero({ settings, whatsappUrl, mailtoUrl, webmailUrl }: HeroProps
               <Monogram className={styles.plateMark} height="3rem" />
             )}
 
-            <p className={styles.plateName}>{settings.brandName}</p>
+            <p className={styles.plateName}>
+              <Txt k="identidad.nombre" />
+            </p>
             <span className={styles.plateRules} aria-hidden="true">
               <span />
               <span />
             </span>
-            <p className={styles.plateRole}>{settings.brandRole}</p>
+            <p className={styles.plateRole}>
+              <Txt k="identidad.cargo" />
+            </p>
 
-            <p className={styles.plateTagline}>{settings.brandTagline}</p>
+            <p className={styles.plateTagline}>
+              <Txt k="identidad.frase" />
+            </p>
 
             <svg
               className={styles.plateSwash}
@@ -121,7 +132,7 @@ export function Hero({ settings, whatsappUrl, mailtoUrl, webmailUrl }: HeroProps
       </div>
 
       <span className={styles.scrollHint} aria-hidden="true">
-        Desliza
+        <Txt k="inicio.desliza" />
         <span className={styles.scrollHintLine} />
       </span>
     </section>

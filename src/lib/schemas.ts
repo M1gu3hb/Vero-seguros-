@@ -21,11 +21,12 @@ const trimmed = (min: number, max: number, label: string) =>
  * separación en párrafos dejaba de reconocerse. Aquí se unifica a `\n` y se
  * limitan los saltos seguidos a dos, que es lo que significa «párrafo nuevo».
  */
+export function normalizeText(value: string): string {
+  return value.replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n')
+}
+
 const multiline = (min: number, max: number, label: string) =>
-  z
-    .string()
-    .transform((value) => value.replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n'))
-    .pipe(trimmed(min, max, label))
+  z.string().transform(normalizeText).pipe(trimmed(min, max, label))
 
 const optionalUrl = z
   .union([z.string().trim().url('La dirección de la imagen no es válida.'), z.literal('')])
@@ -89,10 +90,7 @@ const shortList = (max: number, label: string) =>
 
 /* ── Identidad y contacto ───────────────────────────────────────────────── */
 
-export const identitySchema = z.object({
-  brandName: trimmed(2, 80, 'Nombre'),
-  brandRole: trimmed(2, 90, 'Cargo'),
-  brandTagline: trimmed(2, 90, 'Frase de marca'),
+export const contactSchema = z.object({
   contactEmail: z.string().trim().email('El correo no es válido.').max(160),
   whatsappNumber: z
     .string()
@@ -103,42 +101,20 @@ export const identitySchema = z.object({
       'El número de WhatsApp debe tener entre 10 y 15 dígitos, incluyendo la clave del país (por ejemplo 52).',
     ),
   whatsappMessage: multiline(10, 400, 'Mensaje de WhatsApp'),
-  coverageText: trimmed(2, 90, 'Texto de cobertura'),
 })
 
-/* ── Hero ───────────────────────────────────────────────────────────────── */
+/* ── Fotografías ────────────────────────────────────────────────────────── */
 
-export const heroSchema = z.object({
-  heroEyebrow: trimmed(2, 90, 'Etiqueta'),
-  heroTitle: multiline(10, 160, 'Título'),
-  heroDescription: multiline(20, 500, 'Descripción'),
-  heroPrimaryCta: trimmed(2, 40, 'Botón principal'),
-  heroSecondaryCta: trimmed(2, 40, 'Botón secundario'),
-  heroImageUrl: optionalUrl,
-  heroImageAlt: optionalText(160),
+export const imageSchema = z.object({
+  url: optionalUrl,
+  alt: optionalText(160),
 })
 
-/* ── Sobre Verónica ─────────────────────────────────────────────────────── */
+/* ── Plazos y visibilidad de las formas de pago ─────────────────────────── */
 
-export const aboutSchema = z.object({
-  aboutTitle: trimmed(2, 90, 'Título'),
-  aboutIntro: multiline(20, 500, 'Introducción'),
-  aboutBody: multiline(20, 4000, 'Biografía'),
-  aboutQuote: multiline(10, 300, 'Cita'),
-  aboutImageUrl: optionalUrl,
-  aboutImageAlt: optionalText(160),
-})
-
-/* ── Promociones y formas de pago ───────────────────────────────────────── */
-
-export const promosSchema = z.object({
-  promosTitle: trimmed(2, 90, 'Título'),
-  promosDescription: multiline(20, 700, 'Descripción'),
-  promosNote: multiline(10, 400, 'Nota de condiciones'),
+export const paymentTermsSchema = z.object({
   promosVisible: z.boolean(),
-  promosInstallmentsLabel: trimmed(2, 90, 'Rótulo de los plazos'),
   promosInstallments: shortList(12, 'Plazos'),
-  promosFrequenciesLabel: trimmed(2, 90, 'Rótulo de las modalidades'),
   promosFrequencies: shortList(12, 'Modalidades'),
 })
 
@@ -172,6 +148,21 @@ export const insurerSchema = z.object({
   imageUrl: optionalImageRef,
   imageAlt: optionalText(160),
   isVisible: z.boolean(),
+})
+
+/* ── Textos por clave ───────────────────────────────────────────────────── */
+
+/**
+ * Un lote de frases, tal como sale del administrador.
+ *
+ * El largo de cada una lo fija el catálogo (`src/content/texts.ts`), así que
+ * aquí sólo se comprueba la forma: claves conocidas y texto no vacío. La
+ * comprobación fina va en la acción, que sí tiene el catálogo a mano.
+ */
+export const textsSchema = z.object({
+  values: z
+    .record(z.string(), z.string())
+    .refine((value) => Object.keys(value).length > 0, 'No hay nada que guardar.'),
 })
 
 /* ── Reordenamiento ─────────────────────────────────────────────────────── */
@@ -210,9 +201,8 @@ export const ACCEPTED_IMAGE_TYPES = [
   'image/avif',
 ] as const
 
-export type IdentityInput = z.infer<typeof identitySchema>
-export type HeroInput = z.infer<typeof heroSchema>
-export type AboutInput = z.infer<typeof aboutSchema>
-export type PromosInput = z.infer<typeof promosSchema>
+export type ContactInput = z.infer<typeof contactSchema>
+export type ImageInput = z.infer<typeof imageSchema>
+export type PaymentTermsInput = z.infer<typeof paymentTermsSchema>
 export type ServiceInput = z.infer<typeof serviceSchema>
 export type InsurerInput = z.infer<typeof insurerSchema>

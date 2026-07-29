@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react'
 
 import styles from '@/app/admin/admin.module.css'
-import { saveAbout, saveHero, saveIdentity, savePromos } from '@/actions/content'
+import { saveAboutImage, saveContact, saveHeroImage, savePaymentTerms } from '@/actions/content'
 import { idleState } from '@/actions/types'
 import { ListField } from '@/components/admin/ListField'
 import { MediaField } from '@/components/admin/MediaField'
@@ -13,49 +13,21 @@ import type { SiteSettings } from '@/content/site-content'
 
 type PanelProps = { settings: SiteSettings }
 
-/* ── Identidad y contacto ───────────────────────────────────────────────── */
+/* ── Contacto ───────────────────────────────────────────────────────────────
+   Lo que no es texto de la página: a dónde escriben y por dónde te escriben. */
 
-export function IdentityPanel({ settings }: PanelProps) {
-  const [state, formAction, pending] = useActionState(saveIdentity, idleState)
+export function ContactPanel({ settings }: PanelProps) {
+  const [state, formAction, pending] = useActionState(saveContact, idleState)
   const { dirty, markDirty } = useDirty(state)
 
   return (
     <form className={styles.panel} action={formAction} onChange={markDirty}>
       <PanelHead
-        title="Identidad y contacto"
-        hint="Tu nombre, tu cargo, tu frase de marca y las formas de contacto. El número de WhatsApp nunca aparece escrito en el sitio: sólo se usa para armar el enlace del botón."
+        title="Formas de contacto"
+        hint="A dónde llegan los mensajes. El número de WhatsApp nunca aparece escrito en el sitio: sólo se usa para armar el enlace del botón."
       />
 
       <div className={styles.fields}>
-        <div className={styles.fieldRow}>
-          <TextField
-            name="brandName"
-            label="Nombre"
-            defaultValue={settings.brandName}
-            error={state.errors?.brandName}
-            maxLength={80}
-            required
-          />
-          <TextField
-            name="brandRole"
-            label="Cargo"
-            defaultValue={settings.brandRole}
-            error={state.errors?.brandRole}
-            maxLength={90}
-            required
-          />
-        </div>
-
-        <TextField
-          name="brandTagline"
-          label="Frase de marca"
-          hint="Aparece en el encabezado, en el cierre y en el pie de página."
-          defaultValue={settings.brandTagline}
-          error={state.errors?.brandTagline}
-          maxLength={90}
-          required
-        />
-
         <div className={styles.fieldRow}>
           <TextField
             name="contactEmail"
@@ -82,20 +54,11 @@ export function IdentityPanel({ settings }: PanelProps) {
 
         <TextAreaField
           name="whatsappMessage"
-          label="Mensaje prellenado de WhatsApp"
-          hint="Es el texto que aparece escrito cuando alguien abre la conversación contigo."
+          label="Mensaje prellenado"
+          hint="Es el texto que aparece escrito cuando alguien abre la conversación contigo, y también el cuerpo del correo."
           defaultValue={settings.whatsappMessage}
           error={state.errors?.whatsappMessage}
           maxLength={400}
-          required
-        />
-
-        <TextField
-          name="coverageText"
-          label="Texto de cobertura"
-          defaultValue={settings.coverageText}
-          error={state.errors?.coverageText}
-          maxLength={90}
           required
         />
       </div>
@@ -105,67 +68,19 @@ export function IdentityPanel({ settings }: PanelProps) {
   )
 }
 
-/* ── Inicio (hero) ──────────────────────────────────────────────────────── */
+/* ── Fotografías ───────────────────────────────────────────────────────────── */
 
-export function HeroPanel({ settings }: PanelProps) {
-  const [state, formAction, pending] = useActionState(saveHero, idleState)
+export function HeroImagePanel({ settings }: PanelProps) {
+  const [state, formAction, pending] = useActionState(saveHeroImage, idleState)
   const { dirty, markDirty } = useDirty(state)
 
   return (
     <form className={styles.panel} action={formAction} onChange={markDirty}>
       <PanelHead
-        title="Inicio"
-        hint="Lo primero que se ve al entrar. Si cargas una fotografía tuya, sustituirá al monograma en la tarjeta de presentación; si no, el diseño funciona igual."
+        title="Fotografía de inicio"
+        hint="Si cargas una fotografía tuya, sustituirá al monograma en la tarjeta de presentación; si no, el diseño funciona igual."
       />
-
       <div className={styles.fields}>
-        <TextField
-          name="heroEyebrow"
-          label="Etiqueta superior"
-          defaultValue={settings.heroEyebrow}
-          error={state.errors?.heroEyebrow}
-          maxLength={90}
-          required
-        />
-
-        <TextAreaField
-          name="heroTitle"
-          label="Título principal"
-          hint="Una sola frase, clara y directa."
-          defaultValue={settings.heroTitle}
-          error={state.errors?.heroTitle}
-          maxLength={160}
-          required
-        />
-
-        <TextAreaField
-          name="heroDescription"
-          label="Descripción"
-          defaultValue={settings.heroDescription}
-          error={state.errors?.heroDescription}
-          maxLength={500}
-          required
-        />
-
-        <div className={styles.fieldRow}>
-          <TextField
-            name="heroPrimaryCta"
-            label="Texto del botón de WhatsApp"
-            defaultValue={settings.heroPrimaryCta}
-            error={state.errors?.heroPrimaryCta}
-            maxLength={40}
-            required
-          />
-          <TextField
-            name="heroSecondaryCta"
-            label="Texto del botón de correo"
-            defaultValue={settings.heroSecondaryCta}
-            error={state.errors?.heroSecondaryCta}
-            maxLength={40}
-            required
-          />
-        </div>
-
         <MediaField
           label="Fotografía principal (opcional)"
           urlName="heroImageUrl"
@@ -176,65 +91,19 @@ export function HeroPanel({ settings }: PanelProps) {
           onChanged={markDirty}
         />
       </div>
-
       <FormFoot state={state} pending={pending} dirty={dirty} />
     </form>
   )
 }
 
-/* ── Sobre Verónica ─────────────────────────────────────────────────────── */
-
-export function AboutPanel({ settings }: PanelProps) {
-  const [state, formAction, pending] = useActionState(saveAbout, idleState)
+export function AboutImagePanel({ settings }: PanelProps) {
+  const [state, formAction, pending] = useActionState(saveAboutImage, idleState)
   const { dirty, markDirty } = useDirty(state)
 
   return (
     <form className={styles.panel} action={formAction} onChange={markDirty}>
-      <PanelHead
-        title="Sobre Verónica"
-        hint="Tu historia. Separa los párrafos dejando una línea en blanco entre uno y otro."
-      />
-
+      <PanelHead title="Tu fotografía" hint="Aparece junto a la biografía." />
       <div className={styles.fields}>
-        <TextField
-          name="aboutTitle"
-          label="Título"
-          defaultValue={settings.aboutTitle}
-          error={state.errors?.aboutTitle}
-          maxLength={90}
-          required
-        />
-
-        <TextAreaField
-          name="aboutIntro"
-          label="Introducción"
-          hint="Dos o tres líneas, destacadas en un tamaño mayor."
-          defaultValue={settings.aboutIntro}
-          error={state.errors?.aboutIntro}
-          maxLength={500}
-          required
-        />
-
-        <TextAreaField
-          name="aboutBody"
-          label="Biografía"
-          hint="Deja una línea en blanco entre párrafos."
-          defaultValue={settings.aboutBody}
-          error={state.errors?.aboutBody}
-          maxLength={4000}
-          tall
-          required
-        />
-
-        <TextAreaField
-          name="aboutQuote"
-          label="Cita destacada"
-          defaultValue={settings.aboutQuote}
-          error={state.errors?.aboutQuote}
-          maxLength={300}
-          required
-        />
-
         <MediaField
           label="Fotografía de la sección (opcional)"
           urlName="aboutImageUrl"
@@ -245,69 +114,31 @@ export function AboutPanel({ settings }: PanelProps) {
           onChanged={markDirty}
         />
       </div>
-
       <FormFoot state={state} pending={pending} dirty={dirty} />
     </form>
   )
 }
 
-/* ── Promociones y formas de pago ───────────────────────────────────────── */
+/* ── Plazos y visibilidad de las formas de pago ───────────────────────────── */
 
-export function PromosPanel({ settings }: PanelProps) {
-  const [state, formAction, pending] = useActionState(savePromos, idleState)
+export function PaymentTermsPanel({ settings }: PanelProps) {
+  const [state, formAction, pending] = useActionState(savePaymentTerms, idleState)
   const { dirty, markDirty } = useDirty(state)
   const [visible, setVisible] = useState(settings.promosVisible)
 
   return (
     <form className={styles.panel} action={formAction} onChange={markDirty}>
       <PanelHead
-        title="Promociones y formas de pago"
-        hint="Puedes ocultar toda la sección si en algún momento deja de haber facilidades vigentes."
+        title="Plazos y modalidades"
+        hint="Las listas que aparecen a la derecha de la sección. Quitar uno no afecta a los demás; si dejas una lista vacía, ese bloque no aparece."
       />
 
       <div className={styles.fields}>
-        <TextField
-          name="promosTitle"
-          label="Título"
-          defaultValue={settings.promosTitle}
-          error={state.errors?.promosTitle}
-          maxLength={90}
-          required
-        />
-
-        <TextAreaField
-          name="promosDescription"
-          label="Descripción"
-          defaultValue={settings.promosDescription}
-          error={state.errors?.promosDescription}
-          maxLength={700}
-          required
-        />
-
-        <div className={styles.fieldRow}>
-          <TextField
-            name="promosInstallmentsLabel"
-            label="Rótulo de los plazos"
-            defaultValue={settings.promosInstallmentsLabel}
-            error={state.errors?.promosInstallmentsLabel}
-            maxLength={90}
-            required
-          />
-          <TextField
-            name="promosFrequenciesLabel"
-            label="Rótulo de las modalidades"
-            defaultValue={settings.promosFrequenciesLabel}
-            error={state.errors?.promosFrequenciesLabel}
-            maxLength={90}
-            required
-          />
-        </div>
-
         <div className={styles.fieldRow}>
           <ListField
             name="promosInstallments"
             label="Plazos"
-            hint="Uno por renglón. Quitar uno no afecta a los demás; si dejas la lista vacía, ese bloque no aparece en la página."
+            hint="Uno por renglón."
             values={settings.promosInstallments}
             error={state.errors?.promosInstallments}
             placeholder="3 meses"
@@ -323,16 +154,6 @@ export function PromosPanel({ settings }: PanelProps) {
             onChanged={markDirty}
           />
         </div>
-
-        <TextAreaField
-          name="promosNote"
-          label="Nota de condiciones"
-          hint="Se muestra en letra pequeña, al final de la sección."
-          defaultValue={settings.promosNote}
-          error={state.errors?.promosNote}
-          maxLength={400}
-          required
-        />
 
         <div className={styles.field}>
           <label className={styles.switch}>

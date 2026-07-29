@@ -2,7 +2,8 @@ import { CoilLine } from '@/components/motion/CoilLine'
 import { Reveal } from '@/components/motion/Reveal'
 import { SectionEyebrow } from '@/components/site/SectionHeading'
 import { ServiceList } from '@/components/site/ServiceList'
-import { servicesSection, type Service } from '@/content/site-content'
+import { Txt } from '@/components/content/Texts'
+import type { Service } from '@/content/site-content'
 import { SECTIONS } from '@/lib/site'
 import styles from './Services.module.css'
 
@@ -36,13 +37,13 @@ export function Services({ services }: ServicesProps) {
       <div className="container ruled">
         <div className={styles.head}>
           <Reveal>
-            <SectionEyebrow index="01" label={servicesSection.eyebrow} />
+            <SectionEyebrow index="01" label={<Txt k="seguros.etiqueta" />} />
             <h2 id="servicios-titulo" className={styles.title}>
-              {servicesSection.title}
+              <Txt k="seguros.titulo" />
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className={styles.headText}>{servicesSection.description}</p>
+            <p className={styles.headText}><Txt k="seguros.descripcion" /></p>
           </Reveal>
         </div>
 

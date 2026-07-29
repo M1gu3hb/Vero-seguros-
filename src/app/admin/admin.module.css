@@ -689,3 +689,99 @@
   text-decoration: none;
   cursor: not-allowed;
 }
+
+/* ── Vista previa editable ─────────────────────────────────────────────────
+   La sección real, compuesta al ancho de una pantalla de escritorio y luego
+   encogida para que quepa en el panel. Lo que se ve aquí es lo que se publica.
+   ───────────────────────────────────────────────────────────────────────── */
+.panels {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-content: start;
+  min-width: 0;
+}
+
+.previewBox {
+  margin-block-start: 0.5rem;
+  padding-block-start: 1.25rem;
+  border-block-start: 1px solid var(--rule);
+}
+
+.previewSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  list-style: none;
+  min-height: 2.5rem;
+}
+
+.previewSummary::-webkit-details-marker {
+  display: none;
+}
+
+.previewSummary::before {
+  content: '';
+  width: 0.42rem;
+  height: 0.42rem;
+  border-inline-end: 1px solid currentColor;
+  border-block-end: 1px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--dur) var(--ease);
+}
+
+.previewBox[open] .previewSummary::before {
+  transform: rotate(45deg);
+}
+
+/*
+ * El lienzo se saca del flujo. Compuesto a 1280 px arrastraría el ancho del
+ * panel entero —una transformación reduce lo que se ve, no lo que ocupa—, y el
+ * marco acabaría midiendo esos 1280 px al calcular la escala.
+ */
+.preview {
+  position: relative;
+  width: 100%;
+  margin-block-start: 0.9rem;
+  overflow: hidden;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.previewCanvas {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  transform-origin: top left;
+}
+
+/* Cada frase editable se marca en reposo con un subrayado muy tenue, para que
+   se entienda que se puede pulsar sin llenar la vista de recuadros. */
+.previewCanvas :global(.txt) {
+  display: inline-block;
+  min-width: 1ch;
+  border-radius: 2px;
+  box-shadow: inset 0 -1px 0 rgba(191, 157, 91, 0.55);
+  cursor: text;
+  transition: background-color var(--dur-fast) var(--ease-soft);
+}
+
+/* Un texto con párrafos conserva sus saltos mientras se edita: en la vista
+   previa se lee tal como quedará publicado, no como un bloque corrido. */
+.previewCanvas :global(.txt[data-txt-kind='parrafo']) {
+  white-space: pre-wrap;
+}
+
+.previewCanvas :global(.txt:hover) {
+  background: rgba(191, 157, 91, 0.14);
+}
+
+.previewCanvas :global(.txt:focus) {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 2px;
+  background: rgba(255, 255, 255, 0.6);
+}

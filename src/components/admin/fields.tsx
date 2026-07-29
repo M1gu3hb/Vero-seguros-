@@ -11,6 +11,12 @@ type BaseProps = {
   error?: string[] | undefined
   required?: boolean
   maxLength?: number
+  /**
+   * Valor controlado. Se usa donde el campo comparte borrador con la vista
+   * previa: lo que se escribe en uno tiene que verse en la otra.
+   */
+  value?: string
+  onValueChange?: (value: string) => void
 }
 
 function FieldError({ id, error }: { id: string; error?: string[] }) {
@@ -30,6 +36,8 @@ export function TextField({
   required,
   maxLength,
   defaultValue = '',
+  value,
+  onValueChange,
   type = 'text',
   inputMode,
   autoComplete,
@@ -44,7 +52,8 @@ export function TextField({
   const id = useId()
   const errorId = `${id}-error`
   const hintId = `${id}-hint`
-  const [length, setLength] = useState(defaultValue.length)
+  const controlado = value !== undefined
+  const [length, setLength] = useState((value ?? defaultValue).length)
   const invalid = Boolean(error?.length)
 
   return (
@@ -66,14 +75,17 @@ export function TextField({
         autoComplete={autoComplete}
         placeholder={placeholder}
         className={styles.input}
-        defaultValue={defaultValue}
+        {...(controlado ? { value } : { defaultValue })}
         required={required}
         maxLength={maxLength}
         aria-invalid={invalid || undefined}
         aria-describedby={
           [hint ? hintId : null, invalid ? errorId : null].filter(Boolean).join(' ') || undefined
         }
-        onInput={(event) => setLength(event.currentTarget.value.length)}
+        onChange={(event) => {
+          setLength(event.currentTarget.value.length)
+          onValueChange?.(event.currentTarget.value)
+        }}
       />
       {maxLength ? (
         <span className={styles.counter}>
@@ -93,12 +105,15 @@ export function TextAreaField({
   required,
   maxLength,
   defaultValue = '',
+  value,
+  onValueChange,
   tall = false,
 }: BaseProps & { defaultValue?: string; tall?: boolean }) {
   const id = useId()
   const errorId = `${id}-error`
   const hintId = `${id}-hint`
-  const [length, setLength] = useState(defaultValue.length)
+  const controlado = value !== undefined
+  const [length, setLength] = useState((value ?? defaultValue).length)
   const invalid = Boolean(error?.length)
 
   return (
@@ -116,14 +131,17 @@ export function TextAreaField({
         id={id}
         name={name}
         className={`${styles.textarea} ${tall ? styles.textareaTall : ''}`}
-        defaultValue={defaultValue}
+        {...(controlado ? { value } : { defaultValue })}
         required={required}
         maxLength={maxLength}
         aria-invalid={invalid || undefined}
         aria-describedby={
           [hint ? hintId : null, invalid ? errorId : null].filter(Boolean).join(' ') || undefined
         }
-        onInput={(event) => setLength(event.currentTarget.value.length)}
+        onChange={(event) => {
+          setLength(event.currentTarget.value.length)
+          onValueChange?.(event.currentTarget.value)
+        }}
       />
       {maxLength ? (
         <span className={styles.counter}>

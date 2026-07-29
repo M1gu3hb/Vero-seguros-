@@ -69,6 +69,12 @@ export type SiteSettingsRow = {
   updated_at: string
 }
 
+export type SiteTextRow = {
+  key: string
+  value: string
+  updated_at: string
+}
+
 export type AdminUserRow = {
   user_id: string
   email: string
@@ -102,6 +108,12 @@ export type Database = {
           'id' | 'created_at' | 'updated_at' | 'image_url' | 'image_alt' | 'sort_order' | 'is_visible'
         >
         Update: Partial<InsurerRow>
+        Relationships: []
+      }
+      site_texts: {
+        Row: SiteTextRow
+        Insert: Insert<SiteTextRow, 'updated_at'>
+        Update: Partial<SiteTextRow>
         Relationships: []
       }
       admin_users: {

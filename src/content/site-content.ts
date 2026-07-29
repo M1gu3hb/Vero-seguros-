@@ -69,6 +69,8 @@ export type SiteContent = {
   settings: SiteSettings
   services: Service[]
   insurers: Insurer[]
+  /** Las frases sueltas, por clave. Ver `src/content/texts.ts`. */
+  texts: Record<string, string>
 }
 
 export const defaultSettings: SiteSettings = {
@@ -267,22 +269,17 @@ export const defaultContent: SiteContent = {
   settings: defaultSettings,
   services: defaultServices,
   insurers: defaultInsurers,
+  texts: {},
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
-   Contenido editorial fijo.
+   Textos de las secciones editoriales.
 
-   Estas secciones no se editan desde el CMS a propósito: el administrador
-   debe seguir siendo sencillo. Viven en el repositorio y se versionan con el
-   código.
+   Ya no viven aquí: pasaron a `src/content/texts.ts`, que es el catálogo de
+   todo el texto visible de la página, y de ahí a la tabla `site_texts`. Se
+   conservan `humanSection` y `processSection` porque son el valor con el que
+   nace el sitio: el registro los lee para no repetir las frases en dos sitios.
    ─────────────────────────────────────────────────────────────────────────── */
-
-export const servicesSection = {
-  eyebrow: 'Seguros',
-  title: '¿Qué quieres proteger?',
-  description:
-    'Trabajo con distintas aseguradoras y ramos. Cuéntame tu caso y revisamos juntos qué alternativas existen para ti.',
-}
 
 export const humanSection = {
   eyebrow: 'Sentido humano',
@@ -336,19 +333,3 @@ export const processSection = {
     },
   ],
 }
-
-export const insurersSection = {
-  eyebrow: 'Respaldo',
-  title: 'Aseguradoras con las que trabajo',
-  note: 'La disponibilidad de productos, coberturas y condiciones depende de cada aseguradora y del perfil de contratación.',
-}
-
-export const closingSection = {
-  eyebrow: 'Contacto',
-  title: 'Protege lo que has construido con tanto esfuerzo.',
-  description:
-    'Estoy lista para asesorarte de manera personalizada y sin compromiso. Escríbeme y platicamos con calma.',
-}
-
-export const footerNote =
-  'La contratación, las coberturas, las condiciones y la disponibilidad de cada producto dependen de la aseguradora correspondiente y del perfil de contratación. Este sitio tiene fines informativos y no constituye una oferta de contrato.'

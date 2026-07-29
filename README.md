@@ -72,7 +72,28 @@ Una sola administradora puede editar:
 - **Promociones y pagos** — título, descripción, nota de condiciones,
   visibilidad de la sección y las dos listas de plazos y modalidades, que se
   agregan, se quitan y se reordenan una a una sin tocar las demás.
+- **Sentido humano**, **Cómo trabajamos** y **Cierre y pie** — los cinco
+  puntos, los tres pasos, la llamada final y la letra pequeña del pie. Se
+  reescriben; su cantidad no cambia, porque el diseño de cada sección se apoya
+  en ella.
 - **Tu cuenta** — cambio de contraseña.
+
+Prácticamente **todo el texto visible se edita**. El catálogo de frases vive en
+`src/content/texts.ts`: de ahí salen a la vez los campos del administrador, la
+vista previa y el valor inicial. Las frases que ya estaban en `site_settings`
+siguen en sus columnas; el resto vive en la tabla `site_texts`, por clave.
+
+### Vista previa editable
+
+Debajo de los campos, cada sección se puede desplegar **tal como queda
+publicada**: no es una maqueta, es el mismo componente con sus mismas hojas de
+estilo, compuesto al ancho de una pantalla de escritorio y reducido para que
+quepa en el panel.
+
+Sobre esa vista se puede **pulsar cualquier frase y escribir encima**, como en
+una diapositiva. Los campos de arriba y la vista previa trabajan sobre el mismo
+borrador, así que da igual por dónde se edite: lo que se escribe en uno aparece
+en la otra, y se guarda una sola vez.
 
 No hay CRM, prospectos, cotizador, blog, agenda, pagos ni constructor de
 páginas: el alcance es deliberadamente sencillo.

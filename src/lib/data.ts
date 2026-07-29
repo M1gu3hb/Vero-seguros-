@@ -91,11 +91,18 @@ function anonClient() {
   })
 }
 
+/** Las frases sueltas, de la tabla por clave al mapa que consume la página. */
+export function mapTexts(rows: { key: string; value: string }[] | null): Record<string, string> {
+  const map: Record<string, string> = {}
+  for (const row of rows ?? []) map[row.key] = row.value
+  return map
+}
+
 async function fetchPublicContent(): Promise<SiteContent> {
   try {
     const supabase = anonClient()
 
-    const [settingsResult, servicesResult, insurersResult] = await Promise.all([
+    const [settingsResult, servicesResult, insurersResult, textsResult] = await Promise.all([
       supabase.from('site_settings').select('*').eq('id', 1).maybeSingle(),
       supabase
         .from('services')
@@ -109,11 +116,13 @@ async function fetchPublicContent(): Promise<SiteContent> {
         .eq('is_visible', true)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: true }),
+      supabase.from('site_texts').select('key, value'),
     ])
 
     if (settingsResult.error) throw settingsResult.error
     if (servicesResult.error) throw servicesResult.error
     if (insurersResult.error) throw insurersResult.error
+    if (textsResult.error) throw textsResult.error
 
     return {
       settings: settingsResult.data ? mapSettings(settingsResult.data) : defaultContent.settings,
@@ -123,6 +132,7 @@ async function fetchPublicContent(): Promise<SiteContent> {
       insurers: insurersResult.data?.length
         ? insurersResult.data.map(mapInsurer)
         : defaultContent.insurers,
+      texts: mapTexts(textsResult.data),
     }
   } catch (error) {
     // Respaldo visual: si la base de datos no responde, el sitio sigue en pie
@@ -144,7 +154,7 @@ async function fetchPublicContent(): Promise<SiteContent> {
  * seguiría teniendo la forma vieja y llegaría a la página sin esos campos.
  * Subir el número descarta lo anterior de una vez.
  */
-export const getPublicContent = unstable_cache(fetchPublicContent, ['public-site-content-2'], {
+export const getPublicContent = unstable_cache(fetchPublicContent, ['public-site-content-3'], {
   tags: [SITE_CONTENT_TAG],
   revalidate: 300,
 })
@@ -158,7 +168,7 @@ export const getPublicContent = unstable_cache(fetchPublicContent, ['public-site
 export async function getAdminContent(
   supabase: Awaited<ReturnType<typeof createServerClient>>,
 ): Promise<SiteContent> {
-  const [settingsResult, servicesResult, insurersResult] = await Promise.all([
+  const [settingsResult, servicesResult, insurersResult, textsResult] = await Promise.all([
     supabase.from('site_settings').select('*').eq('id', 1).maybeSingle(),
     supabase
       .from('services')
@@ -170,11 +180,13 @@ export async function getAdminContent(
       .select('*')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true }),
+    supabase.from('site_texts').select('key, value'),
   ])
 
   return {
     settings: settingsResult.data ? mapSettings(settingsResult.data) : defaultContent.settings,
     services: (servicesResult.data ?? []).map(mapService),
     insurers: (insurersResult.data ?? []).map(mapInsurer),
+    texts: mapTexts(textsResult.data),
   }
 }
