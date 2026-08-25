@@ -17,8 +17,13 @@ describe('contenido inicial', () => {
     expect(defaultSettings.whatsappNumber).toBe('525540085632')
   })
 
-  it('carga los ocho ramos confirmados, visibles y ordenados', () => {
-    expect(defaultServices).toHaveLength(8)
+  /*
+   * La lista va escrita a mano a propósito: son los ramos que Verónica
+   * confirmó, y ninguno debe aparecer ni desaparecer sin que ella lo pida.
+   * El orden, en cambio, se comprueba sin repetir números, para que agregar
+   * uno al final no obligue a editar la prueba.
+   */
+  it('carga los ramos confirmados, visibles y ordenados', () => {
     expect(defaultServices.map((service) => service.name)).toEqual([
       'Seguro de Vida',
       'Gastos Médicos Mayores',
@@ -28,9 +33,18 @@ describe('contenido inicial', () => {
       'Seguro de Hogar',
       'Gastos Funerarios',
       'Membresías de Salud',
+      'Seguro de Viajes',
+      'Seguro de Estudiantes',
     ])
     expect(defaultServices.every((service) => service.isVisible)).toBe(true)
-    expect(defaultServices.map((service) => service.sortOrder)).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+    expect(defaultServices.map((service) => service.sortOrder)).toEqual(
+      defaultServices.map((_, indice) => indice + 1),
+    )
+  })
+
+  it('cada ramo tiene un icono propio', () => {
+    const iconos = defaultServices.map((service) => service.icon)
+    expect(new Set(iconos).size).toBe(iconos.length)
   })
 
   it('no repite identificadores de servicio', () => {

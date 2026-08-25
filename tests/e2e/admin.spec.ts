@@ -311,8 +311,16 @@ test.describe('sesión de la administradora', () => {
     await page.reload()
     await expect(campo).toHaveValue(value)
 
-    await page.goto('/')
-    await expect(page.getByText(value).first()).toBeVisible()
+    /*
+     * La página pública se sirve de una copia guardada que el guardado
+     * invalida. Otra prueba corriendo a la vez puede volver a llenarla en ese
+     * mismo instante, así que se recarga hasta verlo en vez de mirar una sola
+     * vez: lo que importa es que el cambio llegue, no en qué milisegundo.
+     */
+    await expect(async () => {
+      await page.goto('/', { waitUntil: 'domcontentloaded' })
+      await expect(page.getByText(value).first()).toBeVisible({ timeout: 2000 })
+    }).toPass({ timeout: 30000 })
 
     // Se restaura el contenido original.
     await page.goto('/admin')

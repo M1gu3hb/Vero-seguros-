@@ -220,6 +220,30 @@ export const defaultServices: Service[] = [
     sortOrder: 8,
     isVisible: true,
   },
+  {
+    id: '11111111-1111-4111-8111-000000000009',
+    name: 'Seguro de Viajes',
+    slug: 'viajes',
+    description:
+      'Respaldo médico y de asistencia mientras estás fuera de casa, dentro del país o en el extranjero.',
+    detail:
+      'Cubre los imprevistos de un viaje, dentro de la vigencia y del destino contratados: atención médica y hospitalaria por accidente o por enfermedad repentina, medicamentos y, si hace falta, traslado sanitario. Según el plan puede sumar pérdida o demora del equipaje, cancelación o interrupción del viaje y asistencia a distancia. Se contrata por viaje o por año, y el destino, la duración y la edad influyen en lo que queda cubierto.',
+    icon: 'viajes',
+    sortOrder: 9,
+    isVisible: true,
+  },
+  {
+    id: '11111111-1111-4111-8111-000000000010',
+    name: 'Seguro de Estudiantes',
+    slug: 'estudiantes',
+    description:
+      'Protección para niñas, niños y jóvenes durante su vida escolar, dentro y fuera del plantel.',
+    detail:
+      'Pensado para la etapa escolar. Cubre la atención médica derivada de un accidente del estudiante —curaciones, estudios, hospitalización y, según el plan, atención dental— durante las actividades escolares y los trayectos de ida y vuelta. Puede incluir apoyo por invalidez o fallecimiento accidental y una beca educativa si llega a faltar quien sostiene los estudios. Hay planes individuales, otros que contrata la escuela para todo el grupo, y coberturas para quien va a estudiar al extranjero.',
+    icon: 'estudiantes',
+    sortOrder: 10,
+    isVisible: true,
+  },
 ]
 
 /*
