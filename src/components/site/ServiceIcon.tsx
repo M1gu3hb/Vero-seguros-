@@ -72,6 +72,21 @@ const PATHS: Record<string, React.ReactNode> = {
       <path d="M20 19h4" />
     </>
   ),
+  viajes: (
+    <>
+      <path d="M4 15c0-6.1 5.4-11 12-11s12 4.9 12 11" />
+      <rect x="8" y="17" width="16" height="10" rx="2" />
+      <path d="M13 17v-2a1.6 1.6 0 0 1 1.6-1.6h2.8A1.6 1.6 0 0 1 19 15v2" />
+      <path d="M8 21h16" />
+    </>
+  ),
+  estudiantes: (
+    <>
+      <path d="M4 15c0-6.1 5.4-11 12-11s12 4.9 12 11" />
+      <path d="M16 15 5.5 19.2 16 23.4l10.5-4.2z" />
+      <path d="M10 21.2v3.4c0 1.3 2.7 2.4 6 2.4s6-1.1 6-2.4v-3.4" />
+    </>
+  ),
   proteccion: (
     <>
       <path d="M4 19c0-6.6 5.4-12 12-12s12 5.4 12 12" />
